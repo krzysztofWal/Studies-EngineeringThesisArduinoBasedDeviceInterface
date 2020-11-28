@@ -5,8 +5,6 @@
 #include "functions.h"
 
 
-
-
 void wyswietlStanyPinowCyfrowych(PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow) {
     for (size_t i = 0; i < iloscPinow; i++) {
         uSend((stanyPinowCyfrowych + i)->nrPinu);

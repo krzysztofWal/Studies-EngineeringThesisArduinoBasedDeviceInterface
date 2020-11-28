@@ -14,24 +14,7 @@
 #define uSend Serial.print
 #define uSendLn Serial.println
 
-/* Definicja typów */
-enum rodzajPolecenia {
-    r, /* read  */
-    w, /* write */
-//    e, /* error */
-};
-
-typedef struct {
-    byte nrPinu;
-    byte stanPinu;
-} PinCyfrowy;
-
-typedef struct {
-    rodzajPolecenia rodzaj;
-    byte nrPinu;
-    byte nowyStan;
-} PolecenieInfo;
-
+#include "typedefs.h"
 
 /*  wyswietlStanyPinowCyfrowych()
     Wysyla serialem stany pinow zapisane w tablicy
