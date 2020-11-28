@@ -9,25 +9,32 @@
 	#include "WProgram.h"
 #endif
 
-
 #include "typedefs.h"
 
-/*  wyswietlStanyPinowCyfrowych()
+/*  wyswietlStanyPinow()
     Wysyla serialem stany pinow zapisane w tablicy
     Przyjmuje wskaznik do tablicy z pinami, ktorej elementamim sa struktury
     oraz jej rozmiar
 */
 void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow);
 
-/* wyswietlStanPinu
-    wyswietla stan pinu
-    argumenty:
-        adres tablicy zawierajacej obecne stany pinow
+/* podajStanPinuCyfrowego()
+     argumenty:
+        adres tablicy pinow
         jej rozmiar
         nr pinu ktorego stan chcemy odczytac
+    zwraca stan pinu wyjsciowego
 */
-void wyswietlStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
-#endif
+byte podajStanPinuCyfrowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+
+/* podajStanPinuAnalogowego
+    argumenty:
+        adres tablicy pinow
+        jej rozmiar
+        nr pinu ktorego stan chcemy odczytac
+     zwraca wartoœæ odczytana z pinu funkcja analogRead() jako procent z 0-5V (uzywa funkcji map())
+*/
+long podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
 
 /*  sprawdzNumerPinu()
     Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy
@@ -74,3 +81,6 @@ Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, by
     !- nie zmienia stanu wyjscia -!
 */
 void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan);
+
+
+#endif

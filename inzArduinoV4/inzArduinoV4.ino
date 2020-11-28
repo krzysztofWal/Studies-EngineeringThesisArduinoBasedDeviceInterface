@@ -75,12 +75,18 @@ void setup()
             uSendLn("=============================================");
             */
             if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
+                /*
                 uSendLn("while(1): pin cyfrowy zapisz");
+                */
                 aktualizujTabeleStanow(zmienStanPinu(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
             } else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
-                wyswietlStanPinuAnalogowego(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu);
+                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu);uSend(" Stan: ");
+                uSendLn(podajStanPinuCyfrowego(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu));
+            } else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY){
+                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu);uSend(" Wartosc: ");
+                uSendLn(podajStanPinuAnalogowego(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu));
             } else {
-                uSend("Odczytaj pin analogowy nr "); uSendLn(sprawdzonePolecenie.nrPinu);
+                wyswietlStanyPinow(stanyPinowCyfrowych, ILOSC_PINOW);
             }
 
         } else {
