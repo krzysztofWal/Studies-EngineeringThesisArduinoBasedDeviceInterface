@@ -9,20 +9,37 @@
 	#include "WProgram.h"
 #endif
 
+#define ILOSC_PINOW 8 
+#define WIELKOSC_BUFORA_SERIAL 5
+#define PIN_ANALOGOWY 2
+#define PIN_CYFROWY 1
+#define ODCZYTAJ_ANALOGOWY 2
+#define ODCZYTAJ_CYFROWY 1
+#define ZMIEN_STAN_CYFROWEG0 0
+#define uSend Serial.print
+#define uSendLn Serial.println
+
 /* Definicja typów */
-enum rodzajPolecenia {
-    r, /* read  */
-    w, /* write */
-//    e, /* error */
-};
+//enum rodzajPolecenia {
+//    ra, /* read  analog */
+//    rd, /* read digital */
+//    w, /* write */
+////    e, /* error */
+//};
+
+//enum rodzajPinu {
+//    d = 1, /* cyfrowy */
+//    a = 2, /* analogowy */
+//};
 
 typedef struct {
     byte nrPinu;
+    byte rodzajPinu;
     byte stanPinu;
-} PinCyfrowy;
+} Pin;
 
 typedef struct {
-    rodzajPolecenia rodzaj;
+    byte rodzajPolecenia;
     byte nrPinu;
     byte nowyStan;
 } PolecenieInfo;

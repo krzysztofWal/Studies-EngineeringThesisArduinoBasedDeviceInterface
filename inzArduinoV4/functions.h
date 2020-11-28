@@ -9,10 +9,6 @@
 	#include "WProgram.h"
 #endif
 
-#define ILOSC_PINOW_CYFROWYCH 5
-#define WIELKOSC_BUFORA_SERIAL 5
-#define uSend Serial.print
-#define uSendLn Serial.println
 
 #include "typedefs.h"
 
@@ -21,17 +17,25 @@
     Przyjmuje wskaznik do tablicy z pinami, ktorej elementamim sa struktury
     oraz jej rozmiar
 */
-void wyswietlStanyPinowCyfrowych(PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow);
+void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow);
 
-void wyswietlStanPinu(PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+/* wyswietlStanPinu
+    wyswietla stan pinu
+    argumenty:
+        adres tablicy zawierajacej obecne stany pinow
+        jej rozmiar
+        nr pinu ktorego stan chcemy odczytac
+*/
+void wyswietlStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
 #endif
 
-/*  sprawdzPrzedzial()
-    Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicy stanyPinowCyfrowych
-    zwraca 1 jesli tak
+/*  sprawdzNumerPinu()
+    Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy
+    zwraca 2 jesli  pin jest analogowy
+    zwraca 1 jesli pin jest cyfrowy
     zwraca 0 jesli nie
 */
-byte sprawdzPrzedzial(byte liczba, PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow);
+byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow);
 
 /* sprawdzPolecenie()
     zapisuje dane z ostatniego otrzymanego polecenia w  strukturze ktorej adres jest przekazany
@@ -46,7 +50,7 @@ byte sprawdzPrzedzial(byte liczba, PinCyfrowy stanyPinowCyfrowych[], size_t ilos
         0 jesli polecenie nie bylo poprawne
     funkcja dziala dla 1 i 2 cyfrowych numerow pinow
 */
-byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow);
+byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin stanyPinowCyfrowych[], size_t iloscPinow);
 
 /* zmienStanPinu
     zmienia stan wyjscia na wybranym pinie cyfrowym
@@ -60,7 +64,7 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         !- nie aktualizuje tablicy stanow tylko zmienia stan wyjscia -!
 
 */
-PinCyfrowy* zmienStanPinu(PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, byte nowyStan);
+Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, byte nowyStan);
 
 /* aktualizujTabeleStanow
     aktualizuje element tablicy stanow
@@ -69,4 +73,4 @@ PinCyfrowy* zmienStanPinu(PinCyfrowy stanyPinowCyfrowych[], size_t iloscPinow, b
         nowy stan pinu
     !- nie zmienia stanu wyjscia -!
 */
-void aktualizujTabeleStanow(PinCyfrowy* stanyPinowCyfrowych, byte nowyStan);
+void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan);
