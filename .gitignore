@@ -1,0 +1,17 @@
+﻿################################################################################
+# Ten plik .gitignore został utworzony automatycznie przez Microsoft(R) Visual Studio.
+################################################################################
+
+/ConsoleApplication1
+/inzArduinoVS_2
+/inzynierkaVS_28.11
+/NewRepo
+/Poio_git_test
+/POIOgitTestowanie
+/POIOrepo
+/Prototypowanie
+/PythonRepo
+/SprawdzanieRzeczyCppPrzedEgzaminem
+/Test
+**/Debug
+**/*.vs
