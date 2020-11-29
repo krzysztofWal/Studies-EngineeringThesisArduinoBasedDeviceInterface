@@ -16,14 +16,14 @@ void setup()
 
     Pin stanyPinowCyfrowych[ILOSC_PINOW] =
     {
-        {2, PIN_CYFROWY, 0},
-        {3, PIN_CYFROWY, 0},
-        {4, PIN_CYFROWY, 0},
-        {5, PIN_CYFROWY, 0},
-        {6, PIN_CYFROWY, 0},
-        {A13, PIN_ANALOGOWY, 0},
-        {A14, PIN_ANALOGOWY, 0},
-        {A15, PIN_ANALOGOWY, 0}
+        {2, PIN_CYFROWY, 0, "led1"},
+        {3, PIN_CYFROWY, 0, "led2"},
+        {4, PIN_CYFROWY, 0, "led3"},
+        {5, PIN_CYFROWY, 0, "led4"},
+        {6, PIN_CYFROWY, 0, "led5"},
+        {A13, PIN_ANALOGOWY, 0, "A13"},
+        {A14, PIN_ANALOGOWY, 0, "A14"},
+        {A15, PIN_ANALOGOWY, 0, "A15"}
     };
 
     pinMode(2, OUTPUT);
@@ -50,7 +50,6 @@ void setup()
 
     while (1) {
 
-
         uSendLn("Wpisz komende: ");
 
         /* czekaj na dane z bufora */
@@ -75,15 +74,21 @@ void setup()
             uSendLn("=============================================");
             */
             if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
-                /*
-                uSendLn("while(1): pin cyfrowy zapisz");
-                */
+                //uSend("while(1): pin cyfrowy zapisz nowyStan");
+                //uSendLn(sprawdzonePolecenie.nowyStan);
                 aktualizujTabeleStanow(zmienStanPinu(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
+               // for (size_t i = 0; i < ILOSC_PINOW; i++) {
+               //     uSend(i);uSend(" ");uSendLn(stanyPinowCyfrowych[i].stanPinu);
+               // }
             } else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
-                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu);uSend(" Stan: ");
+                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu);uSend(" ");
+                wyswietlOpisPinu(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu);
+                uSend(" ");uSend(" Stan: ");
                 uSendLn(podajStanPinuCyfrowego(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu));
             } else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY){
-                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu);uSend(" Wartosc: ");
+                uSend("Pin nr: ");uSend(sprawdzonePolecenie.nrPinu); uSend(" ");
+                wyswietlOpisPinu(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu);
+                uSend(" "); uSend(" Wartosc: ");
                 uSendLn(podajStanPinuAnalogowego(stanyPinowCyfrowych, ILOSC_PINOW, sprawdzonePolecenie.nrPinu));
             } else {
                 wyswietlStanyPinow(stanyPinowCyfrowych, ILOSC_PINOW);

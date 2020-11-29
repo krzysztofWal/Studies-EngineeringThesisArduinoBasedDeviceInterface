@@ -18,26 +18,15 @@
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
 #define ZMIEN_STAN_CYFROWEG0 0
+#define DLUGOSC_OPISU_PINOW 20
 #define uSend Serial.print
 #define uSendLn Serial.println
-
-/* Definicja typów */
-//enum rodzajPolecenia {
-//    ra, /* read  analog */
-//    rd, /* read digital */
-//    w, /* write */
-////    e, /* error */
-//};
-
-//enum rodzajPinu {
-//    d = 1, /* cyfrowy */
-//    a = 2, /* analogowy */
-//};
 
 typedef struct {
     byte nrPinu;
     byte rodzajPinu;
     byte stanPinu;
+    char opisPinu[DLUGOSC_OPISU_PINOW];
 } Pin;
 
 typedef struct {

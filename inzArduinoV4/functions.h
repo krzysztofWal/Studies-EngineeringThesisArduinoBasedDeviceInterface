@@ -82,5 +82,6 @@ Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, by
 */
 void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan);
 
+void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
 
 #endif

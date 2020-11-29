@@ -5,17 +5,24 @@ void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow) {
         uSend((stanyPinowCyfrowych + i)->nrPinu);
         uSend(" ");
         if ((stanyPinowCyfrowych + i)->rodzajPinu == PIN_ANALOGOWY) {
-            uSend("A "); uSendLn(podajStanPinuAnalogowego(stanyPinowCyfrowych, iloscPinow, (stanyPinowCyfrowych + i)->nrPinu));
+            uSend("A "); uSend(podajStanPinuAnalogowego(stanyPinowCyfrowych, iloscPinow, (stanyPinowCyfrowych + i)->nrPinu));
         } else {
-            uSend("D "); uSendLn((stanyPinowCyfrowych + i)->stanPinu);
+            uSend("D "); uSend((stanyPinowCyfrowych + i)->stanPinu);
         }
+        uSend(" ");
+        uSend((stanyPinowCyfrowych + i)->opisPinu);
+        uSendLn();
     }
 }
 
-byte podajStanPinuCyfrowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu) {
+byte podajStanPinuCyfrowego(Pin *stanyPinowCyfrowych, size_t iloscPinow, byte podanyNrPinu) {
     for (size_t i = 0; i < iloscPinow; i++) {
-        if (nrPinu == (stanyPinowCyfrowych + i)->nrPinu) {
-            return stanyPinowCyfrowych->stanPinu;
+        if (podanyNrPinu == (stanyPinowCyfrowych + i)->nrPinu) {
+            /*
+            uSend("podajStanPinuCyfrowego() ");uSend(" ");uSend(podanyNrPinu); uSendLn((stanyPinowCyfrowych + i)->nrPinu);
+            uSendLn((stanyPinowCyfrowych-+ 1)->stanPinu);
+            */
+            return (stanyPinowCyfrowych + i)->stanPinu;
         }
     }
 }
@@ -136,9 +143,9 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                 struktAdr->nowyStan = 0;
                 struktAdr->nrPinu = tempPinNr;
                 return 1;
+            } else {
+                return 0;
             }
-        } else {
-            return 0;
         }
     }
 
@@ -155,4 +162,15 @@ Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, by
 
 void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan) {
     stanyPinowCyfrowych->stanPinu = nowyStan;
+    /*
+    uSend("aktualizujTabeleStanow(): ");uSendLn(stanyPinowCyfrowych->stanPinu);
+    */
+ }
+
+void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu) {
+    for (size_t i = 0; i < iloscPinow; i++) {
+        if ((stanyPinowCyfrowych + i)->nrPinu == nrPinu) {
+            uSend((stanyPinowCyfrowych + i)->opisPinu);
+        }
+    }
 }
