@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-#define ILOSC_PINOW 8 
+#define ILOSC_PINOW 26 
 #define WIELKOSC_BUFORA_SERIAL 5
 #define WSZYSTKIE_PINY 255
 #define PIN_ANALOGOWY 2
@@ -18,7 +18,7 @@
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
 #define ZMIEN_STAN_CYFROWEG0 0
-#define DLUGOSC_OPISU_PINOW 20
+#define DLUGOSC_OPISU_PINOW 31
 #define uSend Serial.print
 #define uSendLn Serial.println
 
@@ -27,6 +27,7 @@ typedef struct {
     byte rodzajPinu;
     byte stanPinu;
     char opisPinu[DLUGOSC_OPISU_PINOW];
+    byte inOut;
 } Pin;
 
 typedef struct {

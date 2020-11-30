@@ -5,9 +5,9 @@ void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow) {
         uSend((stanyPinowCyfrowych + i)->nrPinu);
         uSend(" ");
         if ((stanyPinowCyfrowych + i)->rodzajPinu == PIN_ANALOGOWY) {
-            uSend("A "); uSend(podajStanPinuAnalogowego(stanyPinowCyfrowych, iloscPinow, (stanyPinowCyfrowych + i)->nrPinu));
+            uSend("A "); uSend(podajStanPinuAnalogowego(stanyPinowCyfrowych, iloscPinow, (stanyPinowCyfrowych + i)->nrPinu)); uSend("/100 V ");
         } else {
-            uSend("D "); uSend((stanyPinowCyfrowych + i)->stanPinu);
+            uSend("D "); uSend(podajStanPinuCyfrowego(stanyPinowCyfrowych, iloscPinow, (stanyPinowCyfrowych + i)->nrPinu));
         }
         uSend(" ");
         uSend((stanyPinowCyfrowych + i)->opisPinu);
@@ -22,13 +22,18 @@ byte podajStanPinuCyfrowego(Pin *stanyPinowCyfrowych, size_t iloscPinow, byte po
             uSend("podajStanPinuCyfrowego() ");uSend(" ");uSend(podanyNrPinu); uSendLn((stanyPinowCyfrowych + i)->nrPinu);
             uSendLn((stanyPinowCyfrowych-+ 1)->stanPinu);
             */
-            return (stanyPinowCyfrowych + i)->stanPinu;
+            if ((stanyPinowCyfrowych + i)->inOut == INPUT) {
+                return digitalRead((stanyPinowCyfrowych + i)->nrPinu);
+            }
+            else {
+                return (stanyPinowCyfrowych + i)->stanPinu;
+            }
         }
     }
 }
 
 long podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu) {
-    return map(analogRead(nrPinu), 0, 1023, 0, 100);
+    return map(analogRead(nrPinu), 0, 1023, 0, 500);
 }
 
 byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow) {
@@ -117,6 +122,8 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                 struktAdr->nowyStan = polecenie[tempIndeks + 1] - 48;
                 struktAdr->nrPinu = tempPinNr;
                 return 1;
+            } else {
+                return 0;
             }
         }
     case PIN_ANALOGOWY:
@@ -146,6 +153,8 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
             } else {
                 return 0;
             }
+        } else {
+            return 0;
         }
     }
 

@@ -16,21 +16,54 @@ void setup()
 
     Pin stanyPinowCyfrowych[ILOSC_PINOW] =
     {
-        {2, PIN_CYFROWY, 0, "led1"},
-        {3, PIN_CYFROWY, 0, "led2"},
-        {4, PIN_CYFROWY, 0, "led3"},
-        {5, PIN_CYFROWY, 0, "led4"},
-        {6, PIN_CYFROWY, 0, "led5"},
-        {A13, PIN_ANALOGOWY, 0, "A13"},
-        {A14, PIN_ANALOGOWY, 0, "A14"},
-        {A15, PIN_ANALOGOWY, 0, "A15"}
+        //{2, PIN_CYFROWY, 0, "led1"},
+        //{3, PIN_CYFROWY, 0, "led2"},
+        //{4, PIN_CYFROWY, 0, "led3"},
+        //{5, PIN_CYFROWY, 0, "led4"},
+        //{6, PIN_CYFROWY, 0, "led5"},
+        //{A13, PIN_ANALOGOWY, 0, "A13"},
+        //{A14, PIN_ANALOGOWY, 0, "A14"},
+        //{A15, PIN_ANALOGOWY, 0, "A15"}
+
+        {19, PIN_CYFROWY, 0, "Pulsed/CW mode select", OUTPUT},
+        {18, PIN_CYFROWY, 0, "Laser disable", OUTPUT},
+        {16, PIN_CYFROWY, 0, "Global Enable", OUTPUT},
+        {15, PIN_CYFROWY, 0, "Alignment laser enable", OUTPUT},
+        {14, PIN_CYFROWY, 0, "Laser emission gate", OUTPUT},
+
+        {17, PIN_CYFROWY, 0, "Laser ready", INPUT},
+
+        {2, PIN_CYFROWY, 0, "Power supply fault", INPUT},
+        {3, PIN_CYFROWY, 0, "Reserved (GND?) fault", INPUT},
+        {4, PIN_CYFROWY, 0, "Beam collimator fault", INPUT},
+        {5, PIN_CYFROWY, 0, "Power-amp current fault", INPUT},
+        {6, PIN_CYFROWY, 0, "Pre-amp currernt fault", INPUT},
+        {7, PIN_CYFROWY, 0, "Base plate temp fault", INPUT},
+        {8, PIN_CYFROWY, 0, "Seed laser temp fault", INPUT},
+
+        {A0, PIN_CYFROWY, 0, "State select: 0", OUTPUT},
+        {A1, PIN_CYFROWY, 0, "State select: 1", OUTPUT},
+        {A2, PIN_CYFROWY, 0, "State select: 2", OUTPUT},
+        {A3, PIN_CYFROWY, 0, "State select: 3", OUTPUT},
+        {A4, PIN_CYFROWY, 0, "State select: 4", OUTPUT},
+        {A5, PIN_CYFROWY, 0, "State select: 5", OUTPUT},
+        {A6, PIN_CYFROWY, 0, "State select: 6", OUTPUT},
+        {A7, PIN_CYFROWY, 0, "State select: 7", OUTPUT},
+
+        {A8, PIN_ANALOGOWY, 0, "Base plate temp", INPUT},
+        {A9, PIN_ANALOGOWY, 0, "Pre amp diode current", INPUT},
+        {A10, PIN_ANALOGOWY, 0, "Power amp diode current", INPUT},
+
+        {A11, PIN_ANALOGOWY, 0, "Active-State current set point", INPUT},
+        {A12, PIN_ANALOGOWY, 0, "Simmer current set point", INPUT}
+    
     };
 
-    pinMode(2, OUTPUT);
-    pinMode(3, OUTPUT);
-    pinMode(4, OUTPUT);
-    pinMode(5, OUTPUT);
-    pinMode(6, OUTPUT);
+    for (size_t i = 0; i < ILOSC_PINOW; i++) {
+        if (stanyPinowCyfrowych[i].rodzajPinu == PIN_CYFROWY) {
+            pinMode(stanyPinowCyfrowych[i].nrPinu, stanyPinowCyfrowych[i].inOut);
+        }
+   }
 
     /* wyswietl status poczatkowy */
     uSendLn("===\r\nStatus poczatkowy:");
