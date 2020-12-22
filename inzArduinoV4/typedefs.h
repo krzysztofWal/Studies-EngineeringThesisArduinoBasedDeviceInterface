@@ -11,14 +11,14 @@
 
 /*timer interrupt*/
 #define LOAD 0
-#define COMP 40000;
-#define BUTTON_STILL_PRESSED 2;
-#define BUTTON_NOT_PRESSED_ANYMORE 1;
-#define DO_NOT_CHECK_BUTTON_YET 0;
+#define COMP 40000
+#define BUTTON_STILL_PRESSED 2
+#define BUTTON_NOT_PRESSED_ANYMORE 1
+#define DO_NOT_CHECK_BUTTON_YET 0
 
 
 /*ekran LCD*/
-#define BUTTON_PIN 21
+#define BUTTON_PIN PK6
 #define SCK_PIN 69
 #define MOSI_PIN 9
 #define DC_PIN 10

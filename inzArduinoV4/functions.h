@@ -10,6 +10,12 @@
 #endif
 
 #include "typedefs.h"
+#include "libraries/LCD5110_Graph/LCD5110_Graph.h"
+#include "avr/pgmspace.h"
+
+void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t* font);
+
+void setNext(byte& trybWyswietlacza);
 
 /*  wyswietlStanyPinow()
     Wysyla serialem stany pinow zapisane w tablicy

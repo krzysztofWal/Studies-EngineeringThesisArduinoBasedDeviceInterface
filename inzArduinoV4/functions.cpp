@@ -1,5 +1,37 @@
 #include "functions.h"
 
+
+void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
+    wyswietlacz.clrScr();
+    wyswietlacz.setFont(font);
+    switch (trybWyswietlacza) {
+    case 0:
+        wyswietlacz.print("POW-AMP MONIT", CENTER, 0);
+        wyswietlacz.print("PRE-AMP MONIT", CENTER, 25);
+        break;
+    case 1:
+        wyswietlacz.print("POW-AMP S. P.", CENTER, 0);
+        wyswietlacz.print("PRE-AMP C. P.", CENTER, 25);
+        break;
+    case 2:
+        wyswietlacz.print("B-TEMP MONIT", CENTER, 0);
+        break;
+    default:
+        wyswietlacz.print("Display error", CENTER, 20);
+        break;
+    }
+    wyswietlacz.update();
+}
+
+void setNext(byte& trybWyswietlacza) {
+    if (trybWyswietlacza < 2) {
+        trybWyswietlacza++;
+    }
+    else {
+        trybWyswietlacza = 0;
+    }
+}
+
 void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow) {
     for (size_t i = 0; i < iloscPinow; i++) {
         uSend((stanyPinowCyfrowych + i)->nrPinu);
