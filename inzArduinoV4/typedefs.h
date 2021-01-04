@@ -10,15 +10,21 @@
 #endif
 
 /*timer interrupt*/
-#define LOAD 0
-#define COMP 40000
-#define BUTTON_STILL_PRESSED 2
-#define BUTTON_NOT_PRESSED_ANYMORE 1
-#define DO_NOT_CHECK_BUTTON_YET 0
+#define WARTOSC_WCZYTYWANA 0
+#define PRZYCISK_WCIAZ_WCISNIETY 2
+#define PRZYCISK_ZOSTAL_PUSZCZONY 1
+#define NIE_SPRAWDZAJ_STANU_PRZYCISKU 0
+
+#define PRZERWANIE_TIMER1_ON TIMSK1 = (1 << OCIE1A)
+#define PRZERWANIE_TIMER1_OFF TIMSK1 &= ~(1 << OCIE1A)
+#define PRZERWANIE_TIMER2_OFF TIMSK2 &= ~(1 << OCIE2A)
+#define PRZERWANIE_TIMER2_ON TIMSK2 |= (1 << OCIE2A)
+#define PRZERWANIE_PRZYCISK_ON PCICR |= (1 << PCIE2)
+#define PRZERWANIE_PRZYCISK_OFF PCICR &= ~(1 << PCIE2)
 
 
 /*ekran LCD*/
-#define BUTTON_PIN PK6
+//#define BUTTON_PIN PK6
 #define SCK_PIN 69
 #define MOSI_PIN 9
 #define DC_PIN 10
@@ -40,6 +46,7 @@
 #define uSend Serial.print
 #define uSendLn Serial.println
 
+
 typedef struct {
     byte nrPinu;
     byte rodzajPinu;
@@ -53,6 +60,7 @@ typedef struct {
     byte nrPinu;
     byte nowyStan;
 } PolecenieInfo;
+
 
 
 #endif

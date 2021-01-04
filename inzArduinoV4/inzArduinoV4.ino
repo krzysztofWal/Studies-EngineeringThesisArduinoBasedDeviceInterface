@@ -1,30 +1,27 @@
 
-//#include "libraries/LCD5110_Graph/LCD5110_Graph.h"
-
-#include "typedefs.h"
 #include "functions.h"
 
 byte przerwanie = 0;
-byte timerFlag = 0;
-byte timer2flag = 0;
-bool first = true;
+byte stanPrzycisku = 0;
+byte naliczoneCykleTimerDrugi = 0;
 
 
 ISR(TIMER1_COMPA_vect) {
     if (bit_is_clear(PINK, PK6)) { // bit jest 0 - przycisk przycisniety
-        timerFlag = BUTTON_STILL_PRESSED;
-    } else if (bit_is_set(PINK, PK6)) { //bit jest 1 - przycisk nieprzycisniety
-        timerFlag = BUTTON_NOT_PRESSED_ANYMORE;
+        stanPrzycisku = PRZYCISK_WCIAZ_WCISNIETY;
+    }
+    else if (bit_is_set(PINK, PK6)) { //bit jest 1 - przycisk nieprzycisniety
+        stanPrzycisku = PRZYCISK_ZOSTAL_PUSZCZONY;
     }
 }
 
 ISR(TIMER2_COMPA_vect) {
-    timer2flag++;
+    naliczoneCykleTimerDrugi++;
 }
 
 ISR(PCINT2_vect) {
     przerwanie = 1;
-   // PORTH ^= (1 << PH4);
+    // PORTH ^= (1 << PH4);
 }
 
 void aktualizujWyswietlaneWartosci(LCD5110 &wyswietlacz, int &counter, uint8_t* font) {
@@ -32,6 +29,8 @@ void aktualizujWyswietlaneWartosci(LCD5110 &wyswietlacz, int &counter, uint8_t* 
     wyswietlacz.printNumI(counter, 50, 7);
     wyswietlacz.update();
 }
+
+
 
 void setup()
 {
@@ -76,34 +75,26 @@ void setup()
     
     };
 
+    /*obs³uga wyœwietlacza*/
     extern uint8_t SmallFont[];
     extern uint8_t TinyFont[];
     LCD5110 wyswietlacz(SCK_PIN, MOSI_PIN, DC_PIN, RST_PIN, CS_PIN);
     byte trybWyswietlacza = 0;
     byte poprzedniTrybWyswietlacza = 0;
-    byte wyswietlaczAktualizowany = 0;
+    byte zmienonyEkranWyswietlacza = 0;
+    bool pierwszeWykrycieNacisnieciaPrzycisku = true;
 
-    /*przerwanie od przycisku*/
-    //DDRK &= ~(1 << BUTTON_PIN); //PK6 jako wejœcie
-    pinMode(A14, INPUT_PULLUP); 
-    PCMSK2 = (1 << PCINT22); //interrupt for pin 22 - pk6 - A14
-    PCICR |= (1 << PCIE2); //pin change interrupt enable dla PCIE2
+    /*przerwanie od przycisku - Pin Change Interrupt*/
+    przerwaniePrzyciskUstawienie();
 
-    //DDRH |= (1 << PH4); //dioda jako wyjœcie
-
-    /*timer - przerwania*/
-    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
-    TCCR1B |= (1u << 1); // ustawienie 010 na bitach 2:0 - wybór preskalera
-    TCCR1B &= ~(5u);
-    OCR1A = COMP; //wartoœc porównawcza
+    /* timer u¿ywany do zniwelowania prze³¹czania styków */
+    przyciskTimerUstawienie();
     
-    /* timer odœwie¿anie ekranu*/
-    TCCR2A = 0;
-    TCCR2B |= (7u); // 111 na bitach 2:0 - preskaler 1024
-    OCR2A = 0b11111110; //254 - compare value
+    /* timer - odœwie¿anie ekranu*/
+    czestOdswEkranuTimerUstawienie();
 
-
-    sei(); // enable global interrupts
+    /* umo¿liwienie obs³ugi przerwañ*/
+    sei(); 
 
     /* piny "laserowe" */
     for (size_t i = 0; i < ILOSC_PINOW; i++) {
@@ -143,55 +134,42 @@ void setup()
     int counter = 0;
 
     while (1) {
-
-
-
         if (przerwanie) {
             
-            if (first) {
-                PCICR &= ~(1 << PCIE2); //disable interrupts on button pin
-
-               // poprzedniTrybWyswietlacza = trybWyswietlacza;
-
-                TCNT1 = LOAD; //wartoœæ wczytywana przez timer na pocz¹tku odliczania
-                TIMSK1 = (1 << OCIE1A); // timer1 compare interrupt enable
-                //wlacz timer
-                first = false;
+            if (pierwszeWykrycieNacisnieciaPrzycisku) {
+                /* wykrycie nacisniecia przycisku - wlaczanie pierwszego timera*/
+                PRZERWANIE_PRZYCISK_OFF;
+                TCNT1 = WARTOSC_WCZYTYWANA; //wartoœæ wczytywana przez timer na pocz¹tku odliczania
+                PRZERWANIE_TIMER1_ON;
+                pierwszeWykrycieNacisnieciaPrzycisku = false;
             }
 
-            if (timerFlag != 0) {
-                TIMSK2 &= ~(1 << OCIE2A); //timer 2 compare interrupts disable
-                TIMSK1 &= ~(1 << OCIE1A); // timer 1 compare interrupt disable
+            if (stanPrzycisku != NIE_SPRAWDZAJ_STANU_PRZYCISKU) {
+                PRZERWANIE_TIMER2_OFF;
+                PRZERWANIE_TIMER1_OFF;
                 //if (timerFlag == BUTTON_STILL_PRESSED) {
                     setNext(trybWyswietlacza);
-                    wyswietlaczAktualizowany = 0;
+                    zmienonyEkranWyswietlacza = 0; 
                 //}
-                
-                timerFlag = DO_NOT_CHECK_BUTTON_YET;
-
-                first = true;
-                PCICR |= (1 << PCIE2); //enable interrupts on button pin
+                stanPrzycisku = NIE_SPRAWDZAJ_STANU_PRZYCISKU;
+                pierwszeWykrycieNacisnieciaPrzycisku = true;
+                PRZERWANIE_PRZYCISK_ON;
                 przerwanie = 0;
             }
         }
   
-        if (timer2flag > 19) {
-            TIMSK2 &= ~(1 << OCIE2A); //timer 2 compare interrupts disable
-               // counter++;
+        if (naliczoneCykleTimerDrugi > 19) {
+            PRZERWANIE_TIMER2_OFF;
             aktualizujWyswietlaneWartosci(wyswietlacz, ++counter, SmallFont);
-            timer2flag = 0;
-            uSendLn("Hopsa");
-            TIMSK2 |= (1 << OCIE2A);//enable timer 2 refreshing interrupts
+            naliczoneCykleTimerDrugi = 0;
+            PRZERWANIE_TIMER2_ON;
         }
 
-        if (!wyswietlaczAktualizowany) {
+        if (!zmienonyEkranWyswietlacza) {
            // counter++;
             wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
-            wyswietlaczAktualizowany = 1;
-
-            //enable timer 2 refreshing interrupts
-            TIMSK2 = (1 << OCIE2A);
-
+            zmienonyEkranWyswietlacza = 1;
+            PRZERWANIE_TIMER2_ON;
         }
 
         uSend(bit_is_set(PINK, PK6));uSend(" ");uSend(poprzedniTrybWyswietlacza);uSend(" ");uSend(trybWyswietlacza);uSend(" ");uSendLn(counter);

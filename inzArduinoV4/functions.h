@@ -90,4 +90,8 @@ void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan);
 
 void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
 
+void przyciskTimerUstawienie();
+void czestOdswEkranuTimerUstawienie();
+void przerwaniePrzyciskUstawienie();
+
 #endif

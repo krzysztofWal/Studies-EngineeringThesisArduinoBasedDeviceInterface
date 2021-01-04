@@ -215,3 +215,27 @@ void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu)
         }
     }
 }
+
+void przyciskTimerUstawienie() {
+    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
+    TCCR1B |= 3u ; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybór preskalera /64
+    OCR1A = 16383; //wartoœc porównawcza (do 65 535)
+    /*
+    preskaler 64
+    1 cykl licznika -> 64/16MHz = 4000ns
+    4000ns x 16383 ~= 0,066 ms
+    */
+}
+
+void czestOdswEkranuTimerUstawienie() {
+    TCCR2A = 0;
+    TCCR2B |= (7u); // 111 na bitach 2:0 - preskaler 1024
+    OCR2A = 0b11111110; //254 - compare value
+}
+
+void przerwaniePrzyciskUstawienie() {
+    pinMode(A14, INPUT_PULLUP);
+    PCMSK2 = (1 << PCINT22); //interrupt for pin 22 - pk6 - A14
+    PCICR |= (1 << PCIE2); //pin change interrupt enable dla PCIE2
+}
+
