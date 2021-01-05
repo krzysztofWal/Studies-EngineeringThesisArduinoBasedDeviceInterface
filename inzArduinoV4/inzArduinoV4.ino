@@ -27,14 +27,29 @@ ISR(PCINT2_vect) {
     przerwanieBledy = 1;
 }
 
-
-void aktualizujWyswietlaneWartosci(LCD5110 &wyswietlacz, int &counter, uint8_t* font) {
+void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, Pin* stanyPinowCyfrowych, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font, uint8_t* fontNapisy) {
+   // wyswietl(trybWyswietlacza, wyswietlacz, fontNapisy);
     wyswietlacz.setFont(font);
-    wyswietlacz.printNumI(counter, 50, 7);
+    switch (trybWyswietlacza) {
+    case 0:
+    case 1:
+
+        wyswietlacz.printNumI(odczytaneWartosci[0], WARTOSC_GORA_X, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[1], WARTOSC_GORA_X + 15, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[2], WARTOSC_GORA_X + 28, WARTOSC_GORA_Y);
+            
+        wyswietlacz.printNumI(odczytaneWartosci[3], WARTOSC_DOL_X, WARTOSC_DOL_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[4], WARTOSC_DOL_X + 14, WARTOSC_DOL_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[5], WARTOSC_DOL_X + 27, WARTOSC_DOL_Y);
+    case 2:
+        wyswietlacz.printNumI(odczytaneWartosci[0], WARTOSC_GORA_X, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[1], WARTOSC_GORA_X + 14, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[2], WARTOSC_GORA_X + 27, WARTOSC_GORA_Y);
+        break;
+    }
     wyswietlacz.update();
+
 }
-
-
 
 void setup()
 {
@@ -48,13 +63,13 @@ void setup()
     PolecenieInfo sprawdzonePolecenie;
 
     Pin pinyBledow[ILOSC_PINOW_BLEDOW] = {
-        {A8, PIN_CYFROWY, 0, "Power supply fault", INPUT},
-        {A9, PIN_CYFROWY, 0, "Reserved (GND?) fault", INPUT},
-        {A10, PIN_CYFROWY, 0, "Beam collimator fault", INPUT},
-        {A11, PIN_CYFROWY, 0, "Power-amp current fault", INPUT},
-        {A12, PIN_CYFROWY, 0, "Pre-amp currernt fault", INPUT},
-        {A13, PIN_CYFROWY, 0, "Base plate temp fault", INPUT},
-        {A14, PIN_CYFROWY, 0, "Seed laser temp fault", INPUT},
+        {POW_SUP_FAULT_PIN, PIN_CYFROWY, 0, "Power supply fault", INPUT},
+        {RESERVED_FAULT_PIN, PIN_CYFROWY, 0, "Reserved fault", INPUT},
+        {BEAM_COLL_FAULT_PIN, PIN_CYFROWY, 0, "Beam collimator fault", INPUT},
+        {POW_AMP_CUR_FAULT_PIN, PIN_CYFROWY, 0, "Power-amp current fault", INPUT},
+        {PRE_AMP_CUR_FAULT_PIN, PIN_CYFROWY, 0, "Pre-amp currernt fault", INPUT},
+        {BASE_PLATE_TEMP_FAULT_PIN, PIN_CYFROWY, 0, "Base plate temp fault", INPUT},
+        {SEED_LAS_TEMP_FAULT_PIN, PIN_CYFROWY, 0, "Seed laser temp fault", INPUT},
     };
 
     byte poprzedniStanPinowBledow[ILOSC_PINOW_BLEDOW];
@@ -94,26 +109,40 @@ void setup()
         {STATE_SEL_7_PIN, PIN_CYFROWY, 0, "State select: 7", OUTPUT},
 
         
-       // {BASE_PLATE_TEMP_PIN, PIN_ANALOGOWY, 0, "Base plate temp", INPUT},
-      //  {PRE_AMP_CUR_MON_PIN, PIN_ANALOGOWY, 0, "Pre amp diode current", INPUT},
-      //  {PO_AMP_CUR_MON_PIN, PIN_ANALOGOWY, 0, "Power amp diode current", INPUT},
+        {BASE_PLATE_TEMP_MON_PIN, PIN_ANALOGOWY, 0, "Base plate temp", INPUT},
+        {PRE_AMP_CUR_MON_PIN, PIN_ANALOGOWY, 0, "Pre amp diode current", INPUT},
+        {POW_AMP_CUR_MON_PIN, PIN_ANALOGOWY, 0, "Power amp diode current", INPUT},
 
-     //   {A_S_CUR_S_P_PIN, PIN_ANALOGOWY, 0, "Active-State current set point", INPUT},
-      //  {S_C_S_P_PIN, PIN_ANALOGOWY, 0, "Simmer current set point", INPUT}
+        {A_S_CUR_S_P_PIN, PIN_ANALOGOWY, 0, "Active-State current set point", INPUT},
+       {S_C_S_P_PIN, PIN_ANALOGOWY, 0, "Simmer current set point", INPUT}
     
     };
 
     /*obs³uga wyœwietlacza*/
     extern uint8_t SmallFont[];
     extern uint8_t TinyFont[];
+    extern uint8_t MediumNumbers[];
     LCD5110 wyswietlacz(SCK_PIN, MOSI_PIN, DC_PIN, RST_PIN, CS_PIN);
     byte trybWyswietlacza = 0;
     byte poprzedniTrybWyswietlacza = 0;
     byte zmienonyEkranWyswietlacza = 0;
     bool pierwszeWykrycieNacisnieciaPrzycisku = true;
+    byte odczytaneWartosci[6] = {0, 0 ,0, 0, 0, 0 };
+
+    /*ekspander pinow*/
+    Adafruit_MCP23017 mcp;
+
+    byte ledNrPin[10] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
+
+    mcp.begin();
+    for (size_t i = 0; i < 10; i++) {
+        mcp.pinMode(ledNrPin[i], OUTPUT);
+        mcp.digitalWrite(ledNrPin[i], LOW);
+    }
+
+    /* odcztywanie poczatkowych wartosci */
 
     /*piny bledow */
-    /* odcztywanie poczatkowych wartosci */
     for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
         poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[0].nrPinu);
     }
@@ -143,25 +172,13 @@ void setup()
     /* timer - odœwie¿anie ekranu*/
     czestOdswEkranuTimerUstawienie();
 
-    /* umo¿liwienie obs³ugi przerwañ*/
+    /* umo¿liwienie obs³ugi przerwan*/
     sei(); 
-
   
     /* wyswietl status poczatkowy */
     uSendLn("===\r\nStatus poczatkowy:");
     wyswietlStanyPinow(stanyPinowCyfrowych, ILOSC_PINOW);
     uSendLn("===");
-
-    /*
-        uSendLn(sprawdzPrzedzial(0, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(1, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(2, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(3, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(4, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(5, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn(sprawdzPrzedzial(6, stanyPinowCyfrowych, ILOSC_PINOW_CYFROWYCH));
-        uSendLn();
-    */
 
     wyswietlacz.InitLCD(60);
     wyswietlacz.setFont(SmallFont);
@@ -172,7 +189,6 @@ void setup()
     wyswietlacz.clrScr();
     wyswietlacz.update();
 
-    uSendLn(trybWyswietlacza);
     wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
 
     int counter = 0;
@@ -182,8 +198,8 @@ void setup()
         /* ====== obsluga laser ready =======*/
         if (podajStanPinuCyfrowego(&laserReady, 1, laserReady.nrPinu) != poprzedniStanLaserReady) {
             poprzedniStanLaserReady = podajStanPinuCyfrowego(&laserReady, 1, laserReady.nrPinu);
-
-            uSend("Zmiana stanu laser ready na: "); uSendLn(poprzedniStanLaserReady);
+            mcp.digitalWrite(LED_LASER_READY_PIN, poprzedniStanLaserReady);
+            //uSend("Zmiana stanu laser ready na: "); uSendLn(poprzedniStanLaserReady);
         }
 
         /* ======= obsluga bledow =======- */
@@ -194,15 +210,12 @@ void setup()
 
             for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
                 if (podajStanPinuCyfrowego(stanyPinowCyfrowych, ILOSC_PINOW, pinyBledow[i].nrPinu) != poprzedniStanPinowBledow[i]) {
-                    uSend("Zmiana na pinie: " );
-                    uSend(pinyBledow[i].nrPinu);
-                    uSend(" ");
-                    uSend(pinyBledow[i].opisPinu);
-                    uSend(" Poprzedni stan ");
-                    uSend(poprzedniStanPinowBledow[i]);
-                    uSend(" Obecny stan: ");
-                    uSendLn(podajStanPinuCyfrowego(stanyPinowCyfrowych, ILOSC_PINOW, pinyBledow[i].nrPinu));
+                    
                     poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(stanyPinowCyfrowych, ILOSC_PINOW, pinyBledow[i].nrPinu);
+
+                    mcp.digitalWrite(ledNrPin[i], poprzedniStanPinowBledow[i]);
+      
+ 
                 }
             }
 
@@ -247,7 +260,21 @@ void setup()
         /* ==== obsluga odswiezania wartosci na wyswietlaczu ==== */
         if (naliczoneCykleTimerDrugi > 19) {
             PRZERWANIE_TIMER2_OFF;
-            aktualizujWyswietlaneWartosci(wyswietlacz, ++counter, SmallFont);
+            odczytajWartosci(trybWyswietlacza, odczytaneWartosci);
+
+            uSend(odczytaneWartosci[0]);
+            uSend(odczytaneWartosci[1]);
+            uSend(odczytaneWartosci[2]);
+
+            uSend(" ");
+
+            uSend(odczytaneWartosci[3]);
+            uSend(odczytaneWartosci[4]);
+            uSendLn(odczytaneWartosci[5]);
+
+            
+
+            aktualizujWyswietlaneWartosci(odczytaneWartosci, stanyPinowCyfrowych, wyswietlacz, trybWyswietlacza, MediumNumbers, SmallFont);
             naliczoneCykleTimerDrugi = 0;
             PRZERWANIE_TIMER2_ON;
         }
@@ -291,11 +318,9 @@ void setup()
             /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
 
                     if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN ) {
-                        uSend("Zmieniono stan emition gate enable na: ");
-                        uSendLn(sprawdzonePolecenie.nowyStan);
+                        mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
                     } else if (sprawdzonePolecenie.nrPinu == LAS_DISABLE_PIN) {
-                        uSend("Zmieniono stan laser disable na :");
-                        uSendLn(sprawdzonePolecenie.nowyStan);
+                            mcp.digitalWrite(LED_LASER_DISABLE_PIN, sprawdzonePolecenie.nowyStan);
                     }
  
                 } else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {

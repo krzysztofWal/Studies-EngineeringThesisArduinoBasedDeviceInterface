@@ -12,8 +12,11 @@
 #include "typedefs.h"
 #include "libraries/LCD5110_Graph/LCD5110_Graph.h"
 #include "avr/pgmspace.h"
+#include "libraries/Adafruit-MCP23017-Arduino-Library-master/Adafruit_MCP23017.h"
 
 void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t* font);
+
+void odczytajWartosci(byte trybWyswietlacza, byte* odczytaneWartosci);
 
 void setNext(byte& trybWyswietlacza);
 
@@ -40,7 +43,7 @@ byte podajStanPinuCyfrowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte n
         nr pinu ktorego stan chcemy odczytac
      zwraca wartoœæ odczytana z pinu funkcja analogRead() jako procent z 0-5V (uzywa funkcji map())
 */
-long podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+uint32_t podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
 
 /*  sprawdzNumerPinu()
     Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy

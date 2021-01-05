@@ -22,6 +22,17 @@
 #define PRZERWANIE_PRZYCISK_ON PCICR |= (1 << PCIE2)
 #define PRZERWANIE_PRZYCISK_OFF PCICR &= ~(1 << PCIE2)
 
+/*ekspander - numery pinow wdg dokumentacji Adafruit-MCP23017-Library*/
+#define LED1_PIN 6 // PA6
+#define LED2_PIN 7 // PA7
+#define LED3_PIN 8 // PB0
+#define LED4_PIN 9 //  .
+#define LED5_PIN 10//  .
+#define LED6_PIN 11//  .
+#define LED7_PIN 12
+#define LED_LASER_DISABLE_PIN 13
+#define LED_LASER_READY_PIN 14
+#define LED_LAS_EMIT_GATE_ENABLE_PIN 15//PB7
 
 /*ekran LCD*/
 #define PRZYCISK_PIN 53
@@ -30,6 +41,12 @@
 #define DC_PIN 10
 #define RST_PIN 12
 #define CS_PIN 11
+
+#define WARTOSC_GORA_X 20
+#define WARTOSC_GORA_Y 7
+#define WARTOSC_DOL_X 20
+#define WARTOSC_DOL_Y 33
+
 
 /*piny "laserowe"*/
 #define LASER_EMITION_GATE_PIN 14
@@ -48,15 +65,25 @@
 #define STATE_SEL_6_PIN 35
 #define STATE_SEL_7_PIN 37
 
-#define BASE_PLATE_TEMP_PIN 1
-#define PRE_AMP_CUR_MON_PIN 1
-#define PO_AMP_CUR_MON_PIN 1
-#define A_S_CUR_S_P_PIN 1
-#define S_C_S_P_PIN 1
+#define BASE_PLATE_TEMP_MON_PIN 54
+#define PRE_AMP_CUR_MON_PIN 55
+#define POW_AMP_CUR_MON_PIN 56
+#define A_S_CUR_S_P_PIN 57
+#define S_C_S_P_PIN 58
  
-#define ILOSC_PINOW 21
+#define POW_SUP_FAULT_PIN 62
+#define RESERVED_FAULT_PIN 63
+#define BEAM_COLL_FAULT_PIN 64
+#define POW_AMP_CUR_FAULT_PIN 65
+#define PRE_AMP_CUR_FAULT_PIN 66
+#define BASE_PLATE_TEMP_FAULT_PIN 67
+#define SEED_LAS_TEMP_FAULT_PIN 68
+
+#define ILOSC_PINOW 26
 #define ILOSC_PINOW_BLEDOW 7
 #define WIELKOSC_BUFORA_SERIAL 5
+
+/* zmienne funkcji */
 
 #define WSZYSTKIE_PINY 255
 #define PIN_NIE_ISTNIEJE 0
@@ -72,6 +99,7 @@
 
 #define DLUGOSC_OPISU_PINOW 31
 
+/* === */
 #define uSend Serial.print
 #define uSendLn Serial.println
 
