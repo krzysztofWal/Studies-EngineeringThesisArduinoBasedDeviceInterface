@@ -69,13 +69,19 @@ long podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte
 }
 
 byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow) {
-    byte temp = 0;
+    byte temp = PIN_NIE_ISTNIEJE;
     for (size_t i = 0; i < iloscPinow; i++) {
         if (liczba == (stanyPinowCyfrowych + i)->nrPinu) {
-            temp = (stanyPinowCyfrowych + i)->rodzajPinu;
-            /*
-            uSend("sprawdzPrzedzial(): liczba iteracji: "); uSendLn(i + 1);
-            */
+            if ((stanyPinowCyfrowych + i)->rodzajPinu == PIN_CYFROWY) {
+                if ((stanyPinowCyfrowych + i)->inOut == INPUT) {
+                    temp = PIN_CYFROWY_WEJSCIE;
+                } else {
+                    temp = PIN_CYFROWY_WYJSCIE;
+                }
+            } else {
+                temp = (stanyPinowCyfrowych + i)->rodzajPinu;
+            }
+
             break;
             /* przerwij petle jesli znalazles */
         }
@@ -84,10 +90,6 @@ byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow)
 }
 
 byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin stanyPinowCyfrowych[], size_t iloscPinow) {
-    /*
-    polecenieInfo tempInfo = {e, 0, 0}; // w przypadku zwracania struktury
-    */
-
     size_t tempIndeks = 0;
     byte tempPinNr = 0; //255 - wszystkie piny
     byte analogowyCzyCyfrowy = 3;
@@ -97,10 +99,6 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         tempIndeks++;
     }
    
-    /*
-    uSend("sprawdzPolecenie(): dlugosc pierwszego numeru: "); uSendLn(tempIndeks);
-    */
-   
     /*policz jaki to numer, najwiekszy mozliwy to 2-cyfrowy */
     if (tempIndeks == 2) {
         tempPinNr += *(polecenie + 1) - 48 + (*polecenie - 48) * 10;
@@ -109,9 +107,6 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         */
     }
     else if (tempIndeks == 1) {
-        /*
-        uSend("sprawdzPolecenie(): "); uSend(*polecenie - 48);uSendLn();
-        */
         tempPinNr += (*polecenie - 48);
     }
     else { /* temp indeks > 2 lub temp indeks == 0*/
@@ -121,16 +116,6 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         } else {
            return 0; /* numer pinu 3-cyfrowy lub wiekszy - nieodpowiedni lub brak numeru a pierwszy znak to nie 'a'*/
         }
-        /*
-        uSendLn("sprawdzPolecenie(): zla instrukcja");
-        /*
-        return tempInfo;
-        */
-        /*
-        if (tempIndeks == 0 && ) {
-            tempPinNr = 255;
-        } else {
-        */
         
     }
 
@@ -140,10 +125,10 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         analogowyCzyCyfrowy = WSZYSTKIE_PINY;
 
     switch (analogowyCzyCyfrowy) {
-    case 0:
+    case PIN_NIE_ISTNIEJE:
         /* nie ma takiego pinu */
         return 0;
-    case PIN_CYFROWY:
+    case PIN_CYFROWY_WYJSCIE:
         /*pin jest cyfrowy, mozna wiec dokonac operacji zapisu i odczytu */
         /* nastepny znak to 0 lub 1 za ktorym nastepuje NULL - prawidlowa operacja zapisu*/
         if (polecenie[tempIndeks] == 'w') {
@@ -158,13 +143,11 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                 return 0;
             }
         }
+    case PIN_CYFROWY_WEJSCIE:
     case PIN_ANALOGOWY:
     case WSZYSTKIE_PINY:
         /*pin jest analogowy lub sa to wszystkie piny, mozna wiec dokonac tylko operacji odczytu*/
         /*nastepny znak to null, prawidlowa instrukcja odczytu*/
-
-        //uSend("sprawdzPolecenie(): pin analogowy, zmienna analogowyCzyCyfrowy: ");
-        //uSendLn(analogowyCzyCyfrowy);
 
         if ((polecenie[tempIndeks] == 'r')) {
             if (polecenie[tempIndeks + 1] == 0) {
@@ -172,7 +155,7 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                 case PIN_ANALOGOWY:
                     struktAdr->rodzajPolecenia = ODCZYTAJ_ANALOGOWY;
                     break;
-                case PIN_CYFROWY:
+                case PIN_CYFROWY_WEJSCIE:
                     struktAdr->rodzajPolecenia = ODCZYTAJ_CYFROWY;
                     break;
                 case WSZYSTKIE_PINY:
@@ -234,8 +217,13 @@ void czestOdswEkranuTimerUstawienie() {
 }
 
 void przerwaniePrzyciskUstawienie() {
-    pinMode(A14, INPUT_PULLUP);
-    PCMSK2 = (1 << PCINT22); //interrupt for pin 22 - pk6 - A14
-    PCICR |= (1 << PCIE2); //pin change interrupt enable dla PCIE2
+    
+    PCMSK0 = (1 << PCINT0); //przerwanie PCINT0 na pinie 53
+    PCICR |= (1 << PCIE0); //pin change interrupt enable dla PCIE0
+}
+
+void przerwanieBledyUstawienie() {
+    PCMSK2 |= 0b01111111; //przerwania PCINT16-23 na pinach A8-14
+    PCICR |= (1 << PCIE2);
 }
 

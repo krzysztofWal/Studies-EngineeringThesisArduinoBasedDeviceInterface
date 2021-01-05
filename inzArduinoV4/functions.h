@@ -44,9 +44,7 @@ long podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte
 
 /*  sprawdzNumerPinu()
     Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy
-    zwraca 2 jesli  pin jest analogowy
-    zwraca 1 jesli pin jest cyfrowy
-    zwraca 0 jesli nie
+    zwraca PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE albo PIN_NIE_ISTNIEJE
 */
 byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow);
 
@@ -93,5 +91,6 @@ void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu)
 void przyciskTimerUstawienie();
 void czestOdswEkranuTimerUstawienie();
 void przerwaniePrzyciskUstawienie();
+void przerwanieBledyUstawienie();
 
 #endif
