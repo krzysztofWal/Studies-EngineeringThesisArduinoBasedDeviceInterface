@@ -1,10 +1,9 @@
 
 #include "functions.h"
 
-byte przerwanie = 0;
-byte stanPrzycisku = 0;
-byte naliczoneCykleTimerDrugi = 0;
-
+volatile byte przerwanie = 0;
+volatile byte stanPrzycisku = 0;
+volatile byte naliczoneCykleTimerDrugi = 0;
 
 ISR(TIMER1_COMPA_vect) {
     if (bit_is_clear(PINK, PK6)) { // bit jest 0 - przycisk przycisniety
@@ -34,7 +33,11 @@ void aktualizujWyswietlaneWartosci(LCD5110 &wyswietlacz, int &counter, uint8_t* 
 
 void setup()
 {
+    /*komunikacja z komputerem*/
     Serial.begin(9600);
+    char bufor[WIELKOSC_BUFORA_SERIAL];
+    bool buforPelny = false;
+    byte index = 0;
 
     char polecenie[WIELKOSC_BUFORA_SERIAL];
     PolecenieInfo sprawdzonePolecenie;
@@ -172,8 +175,39 @@ void setup()
             PRZERWANIE_TIMER2_ON;
         }
 
-        uSend(bit_is_set(PINK, PK6));uSend(" ");uSend(poprzedniTrybWyswietlacza);uSend(" ");uSend(trybWyswietlacza);uSend(" ");uSendLn(counter);
+       // uSend(bit_is_set(PINK, PK6));uSend(" ");uSend(poprzedniTrybWyswietlacza);uSend(" ");uSend(trybWyswietlacza);uSend(" ");uSendLn(counter);
         
+        
+        if (Serial.available() > 0) {
+            bufor[index++] = Serial.read();
+            if (index == 6 || bufor[index - 1] == 13 || bufor[index - 1] == 10) {
+                index = 0;
+                buforPelny = 1;
+            }
+          //  uSend(" -- > i = ");uSendLn(index);
+        }
+        
+        if (buforPelny) {
+            size_t i = 0;
+            while (i < 6) {
+                if (bufor[i] != 13) {
+                    uSendLn(bufor[i++]);
+                } else {
+                    i = 6;
+                }
+            }
+            //for (size_t i = 0; i < 6; i++) {
+            //    if (bufor[i] != 13 && bufor[i] != 13)
+            //        uSend(i); uSend(" "); uSend(bufor[i]); uSendLn(" ");
+            //   if (bufor[i] == 13)
+            //        uSend(" \\n ");
+            //    //if (bufor[i] == 10)
+            //      //  uSend(" \\r ");
+            //}
+
+            buforPelny = buforPelny > 1;
+        }
+
         ///* czekaj na dane z bufora */
         //while (Serial.available() < 1) {
         //}
