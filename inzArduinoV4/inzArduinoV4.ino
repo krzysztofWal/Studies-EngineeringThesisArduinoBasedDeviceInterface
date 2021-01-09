@@ -135,6 +135,7 @@ void setup()
     /*ekspander pinow*/
     Adafruit_MCP23017 mcp;
 
+    /*pierwsze siedem LEDow odpowiada kolejnym pinom w tablicy pinyBledow*/
     byte ledNrPin[10] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
 
     mcp.begin();
@@ -148,6 +149,9 @@ void setup()
     /*piny bledow */
     for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
         poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[0].rzeczywistyNrPinu);
+        /* jesli stan jest niski, to znaczy ¿e jest fault*/
+        if (poprzedniStanPinowBledow[i] == LOW);
+        mcp.digitalWrite(ledNrPin[i], HIGH);
     }
 
     /* piny "laserowe" */
@@ -215,8 +219,11 @@ void setup()
                 if (podajStanPinuCyfrowego(wszystkiePiny, ILOSC_PINOW, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
                     
                     poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(wszystkiePiny, ILOSC_PINOW, pinyBledow[i].rzeczywistyNrPinu);
-
-                    mcp.digitalWrite(ledNrPin[i], poprzedniStanPinowBledow[i]);
+                    
+                    if (poprzedniStanPinowBledow[i] == HIGH)
+                        mcp.digitalWrite(ledNrPin[i], LOW);
+                    else
+                        mcp.digitalWrite(ledNrPin[i], HIGH);
                 }
             }
 
