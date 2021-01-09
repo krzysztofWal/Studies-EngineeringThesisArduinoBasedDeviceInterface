@@ -8,7 +8,6 @@ volatile byte przerwanieBledy = 0;
 
 
 ISR(TIMER1_COMPA_vect) {
-   // uSendLn(bit_is_clear(PRZYCISK_PORT, PRZYCISK_REJ_POZYCJA));
     if (bit_is_set(PRZYCISK_PORT, PRZYCISK_REJ_POZYCJA)) { // bit jest 1 - przycisk przycisniety
         stanPrzycisku = PRZYCISK_WCIAZ_WCISNIETY;
     }
@@ -161,6 +160,12 @@ void setup()
 
     /* pin laser ready */ 
     poprzedniStanLaserReady = podajStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu);
+    if (poprzedniStanLaserReady == HIGH) {
+        mcp.digitalWrite(LED_LASER_READY_PIN, HIGH);
+    } else {
+        mcp.digitalWrite(LED_LASER_READY_PIN, LOW);
+    }
+
 
     /*piny bledow */
     for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
@@ -182,7 +187,6 @@ void setup()
 
     /*przerwanie od przycisku - Pin Change Interrupt*/
     przerwaniePrzyciskUstawienie();
-
 
     /* timer u¿ywany do zniwelowania prze³¹czania styków */
     przyciskTimerUstawienie();
@@ -257,24 +261,9 @@ void setup()
 
         /* ==== obsluga odswiezania wartosci na wyswietlaczu ==== */
         if (naliczoneCykleTimerDrugi > 19) {
-        //    PRZERWANIE_TIMER2_OFF;
             odczytajWartosciADC(trybWyswietlacza, odczytaneWartosci);
-
-            /*
-            uSend(odczytaneWartosci[0]);
-            uSend(odczytaneWartosci[1]);
-            uSend(odczytaneWartosci[2]);
-
-            uSend(" ");
-
-            uSend(odczytaneWartosci[3]);
-            uSend(odczytaneWartosci[4]);
-            uSendLn(odczytaneWartosci[5]);
-            */
-
             aktualizujWyswietlaneWartosci(odczytaneWartosci, wszystkiePiny, wyswietlacz, trybWyswietlacza, MediumNumbers, SmallFont);
             naliczoneCykleTimerDrugi = 0;
-        //    PRZERWANIE_TIMER2_ON;
         }
 
         /* ==== odbieranie komend od uzytkownika ==== */
