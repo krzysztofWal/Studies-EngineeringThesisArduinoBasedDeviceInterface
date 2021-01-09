@@ -15,6 +15,7 @@
 #define PRZYCISK_ZOSTAL_PUSZCZONY 1
 #define NIE_SPRAWDZAJ_STANU_PRZYCISKU 0
 
+
 #define PRZERWANIE_TIMER1_ON TIMSK1 = (1 << OCIE1A)
 #define PRZERWANIE_TIMER1_OFF TIMSK1 &= ~(1 << OCIE1A)
 #define PRZERWANIE_TIMER2_OFF TIMSK2 &= ~(1 << OCIE2A)
@@ -36,6 +37,8 @@
 
 /*ekran LCD*/
 #define PRZYCISK_PIN 53
+#define PRZYCISK_PORT PINB
+#define PRZYCISK_REJ_POZYCJA PB0
 #define SCK_PIN 51
 #define MOSI_PIN 9
 #define DC_PIN 10
@@ -99,13 +102,16 @@
 
 #define DLUGOSC_OPISU_PINOW 31
 
+/*nie zmieniac bez modyfikacji funkcji odczytajWartosciADC - wykorzystuje ona bufor z szescioma wartosciami*/
+#define ILOSC_CYFR_ADC 6  
+
 /* === */
 #define uSend Serial.print
 #define uSendLn Serial.println
 
 
 typedef struct {
-    byte nrPinu;
+    byte rzeczywistyNrPinu;
     byte rodzajPinu;
     byte stanPinu;
     char opisPinu[DLUGOSC_OPISU_PINOW];

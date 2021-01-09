@@ -16,7 +16,7 @@
 
 void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t* font);
 
-void odczytajWartosci(byte trybWyswietlacza, byte* odczytaneWartosci);
+void odczytajWartosciADC(byte trybWyswietlacza, byte* odczytaneWartosci);
 
 void setNext(byte& trybWyswietlacza);
 
@@ -25,7 +25,7 @@ void setNext(byte& trybWyswietlacza);
     Przyjmuje wskaznik do tablicy z pinami, ktorej elementamim sa struktury
     oraz jej rozmiar
 */
-void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow);
+void wyswietlStanyPinow(Pin wszystkiePiny[], size_t iloscPinow);
 
 /* podajStanPinuCyfrowego()
      argumenty:
@@ -34,7 +34,7 @@ void wyswietlStanyPinow(Pin stanyPinowCyfrowych[], size_t iloscPinow);
         nr pinu ktorego stan chcemy odczytac
     zwraca stan pinu wyjsciowego
 */
-byte podajStanPinuCyfrowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+byte podajStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 /* podajStanPinuAnalogowego
     argumenty:
@@ -43,13 +43,13 @@ byte podajStanPinuCyfrowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte n
         nr pinu ktorego stan chcemy odczytac
      zwraca wartoœæ odczytana z pinu funkcja analogRead() jako procent z 0-5V (uzywa funkcji map())
 */
-uint32_t podajStanPinuAnalogowego(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+uint32_t podajStanPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 /*  sprawdzNumerPinu()
     Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy
     zwraca PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE albo PIN_NIE_ISTNIEJE
 */
-byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow);
+byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow);
 
 /* sprawdzPolecenie()
     zapisuje dane z ostatniego otrzymanego polecenia w  strukturze ktorej adres jest przekazany
@@ -64,7 +64,7 @@ byte sprawdzNumerPinu(byte liczba, Pin stanyPinowCyfrowych[], size_t iloscPinow)
         0 jesli polecenie nie bylo poprawne
     funkcja dziala dla 1 i 2 cyfrowych numerow pinow
 */
-byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin stanyPinowCyfrowych[], size_t iloscPinow);
+byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin wszystkiePiny[], size_t iloscPinow);
 
 /* zmienStanPinu
     zmienia stan wyjscia na wybranym pinie cyfrowym
@@ -78,7 +78,7 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         !- nie aktualizuje tablicy stanow tylko zmienia stan wyjscia -!
 
 */
-Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, byte nowyStan);
+Pin* zmienStanPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu, byte nowyStan);
 
 /* aktualizujTabeleStanow
     aktualizuje element tablicy stanow
@@ -87,9 +87,9 @@ Pin* zmienStanPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu, by
         nowy stan pinu
     !- nie zmienia stanu wyjscia -!
 */
-void aktualizujTabeleStanow(Pin* stanyPinowCyfrowych, byte nowyStan);
+void aktualizujTabeleStanow(Pin* wszystkiePiny, byte nowyStan);
 
-void wyswietlOpisPinu(Pin stanyPinowCyfrowych[], size_t iloscPinow, byte nrPinu);
+void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 void przyciskTimerUstawienie();
 void czestOdswEkranuTimerUstawienie();
