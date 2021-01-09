@@ -83,7 +83,10 @@
 #define SEED_LAS_TEMP_FAULT_PIN 68
 
 #define ILOSC_PINOW 26
+/*ILOSC_PINOW_BLEDOW musi byc mniejsza lub rowna ILOSC_LEDOW
+patrz: funkcja obslugaLedowBledow()*/
 #define ILOSC_PINOW_BLEDOW 7
+#define ILOSC_LEDOW 10 
 #define WIELKOSC_BUFORA_SERIAL 5
 
 /* zmienne funkcji */

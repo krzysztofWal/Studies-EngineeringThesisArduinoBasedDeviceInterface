@@ -136,33 +136,46 @@ void setup()
     Adafruit_MCP23017 mcp;
 
     /*pierwsze siedem LEDow odpowiada kolejnym pinom w tablicy pinyBledow*/
-    byte ledNrPin[10] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
+    byte ledNrPin[ILOSC_LEDOW] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
 
-    mcp.begin();
-    for (size_t i = 0; i < 10; i++) {
-        mcp.pinMode(ledNrPin[i], OUTPUT);
-        mcp.digitalWrite(ledNrPin[i], LOW);
-    }
-
-    /* odcztywanie poczatkowych wartosci */
-
-    /*piny bledow */
-    for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
-        poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[0].rzeczywistyNrPinu);
-        /* jesli stan jest niski, to znaczy ¿e jest fault*/
-        if (poprzedniStanPinowBledow[i] == LOW);
-        mcp.digitalWrite(ledNrPin[i], HIGH);
-    }
-
-    /* piny "laserowe" */
+    
+    /* piny  */
     for (size_t i = 0; i < ILOSC_PINOW; i++) {
         if (wszystkiePiny[i].rodzajPinu == PIN_CYFROWY) {
             pinMode(wszystkiePiny[i].rzeczywistyNrPinu, wszystkiePiny[i].inOut);
+        }
+        /*ustaw wszystkie wejscia na 0*/
+        if (wszystkiePiny[i].inOut == OUTPUT) {
+            digitalWrite(wszystkiePiny[i].rzeczywistyNrPinu, LOW);
+        }
+       //uSend(podajStanPinuCyfrowego(wszystkiePiny, ILOSC_PINOW, wszystkie[i].rzeczywistyNrPinu))
+    }
+
+    mcp.begin();
+    for (size_t i = 0; i < ILOSC_LEDOW; i++) {
+        mcp.pinMode(ledNrPin[i], OUTPUT);
+        if (ledNrPin[i] == LED_LASER_DISABLE_PIN || ledNrPin[i] == LED_LAS_EMIT_GATE_ENABLE_PIN) {
+            mcp.digitalWrite(ledNrPin[i], LOW);
         }
     }
 
     /* pin laser ready */ 
     poprzedniStanLaserReady = podajStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu);
+
+    /*piny bledow */
+    for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
+        poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[i].rzeczywistyNrPinu);
+        uSendLn(podajStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[i].rzeczywistyNrPinu));
+        /* jesli stan jest niski, to znaczy ¿e jest fault*/
+        if (poprzedniStanPinowBledow[i] == LOW) {
+            mcp.digitalWrite(ledNrPin[i], HIGH);
+          //  uSend("Zmieniono na dodatnie: "); uSendLn(i);
+        }
+        else if (poprzedniStanPinowBledow[i] == HIGH) {
+            mcp.digitalWrite(ledNrPin[i], LOW);
+        //    uSend("Zmieniono na wylaczone"); uSendLn(i);
+        }
+    }
 
     /* przycisk prze³¹czaj¹cy wartosci wyswietlane na ekranie */
     pinMode(PRZYCISK_PIN, INPUT_PULLUP);
@@ -170,8 +183,6 @@ void setup()
     /*przerwanie od przycisku - Pin Change Interrupt*/
     przerwaniePrzyciskUstawienie();
 
-    /* Przerwanie od zmiany wejsc bledow */
-    przerwanieBledyUstawienie();
 
     /* timer u¿ywany do zniwelowania prze³¹czania styków */
     przyciskTimerUstawienie();
@@ -209,29 +220,8 @@ void setup()
             //uSend("Zmiana stanu laser ready na: "); uSendLn(poprzedniStanLaserReady);
         }
 
-        /* ======= obsluga bledow =======- */
-        if (przerwanieBledy) {
-            PRZERWANIE_PRZYCISK_OFF;
-            PRZERWANIE_TIMER1_OFF;
-            PRZERWANIE_TIMER2_OFF;
-
-            for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
-                if (podajStanPinuCyfrowego(wszystkiePiny, ILOSC_PINOW, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
-                    
-                    poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(wszystkiePiny, ILOSC_PINOW, pinyBledow[i].rzeczywistyNrPinu);
-                    
-                    if (poprzedniStanPinowBledow[i] == HIGH)
-                        mcp.digitalWrite(ledNrPin[i], LOW);
-                    else
-                        mcp.digitalWrite(ledNrPin[i], HIGH);
-                }
-            }
-
-            przerwanieBledy = 0;
-            PRZERWANIE_PRZYCISK_ON;
-            PRZERWANIE_TIMER1_ON;
-            PRZERWANIE_TIMER2_ON;
-        }
+        /* ======= obsluga bledow (LEDOW) =======- */
+       obslugaLedowBledow(wszystkiePiny, ILOSC_PINOW, pinyBledow, poprzedniStanPinowBledow, ILOSC_PINOW_BLEDOW, ledNrPin, mcp);
 
         /* ===== obsluga przycisku ======= */
         if (przerwaniePrzycisk) {

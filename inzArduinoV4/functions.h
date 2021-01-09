@@ -94,6 +94,8 @@ void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 void przyciskTimerUstawienie();
 void czestOdswEkranuTimerUstawienie();
 void przerwaniePrzyciskUstawienie();
-void przerwanieBledyUstawienie();
+
+void obslugaLedowBledow(Pin* wszystkiePiny, byte iloscPinow, Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp);
+//void przerwanieBledyUstawienie();
 
 #endif

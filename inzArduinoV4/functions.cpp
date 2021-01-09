@@ -247,8 +247,19 @@ void przerwaniePrzyciskUstawienie() {
     PCICR |= (1 << PCIE0); //pin change interrupt enable dla PCIE0
 }
 
-void przerwanieBledyUstawienie() {
-    PCMSK2 |= 0b01111111; //przerwania PCINT16-23 na pinach A8-14
-    PCICR |= (1 << PCIE2);
+/*w przypadku tej funkcji musi zachodzic 
+ILOSC_PINOW_BLEDOW <= ilosci ledow */
+void obslugaLedowBledow(Pin *wszystkiePiny, byte iloscPinow, Pin *pinyBledow, byte *poprzedniStanPinowBledow, byte iloscPinowBledow, byte *ledNrPin, Adafruit_MCP23017 &mcp) {
+    for (size_t i = 0; i < iloscPinowBledow; i++) {
+        if (podajStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
+
+            poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu);
+
+            if (poprzedniStanPinowBledow[i] == HIGH)
+                mcp.digitalWrite(ledNrPin[i], LOW);
+            else
+                mcp.digitalWrite(ledNrPin[i], HIGH);
+        }
+    }
 }
 
