@@ -14,11 +14,14 @@
 #include "avr/pgmspace.h"
 #include "libraries/Adafruit-MCP23017-Arduino-Library-master/Adafruit_MCP23017.h"
 
+
 void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t* font);
 
-void odczytajWartosciADC(byte trybWyswietlacza, byte* odczytaneWartosci);
+void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania);
 
-void setNext(byte& trybWyswietlacza);
+void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, Pin* stanyPinowCyfrowych, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font, uint8_t* fontNapisy);
+
+void odczytajWartosciPinowAnalogowych(byte trybWyswietlacza, byte* odczytaneWartosci);
 
 /*  wyswietlStanyPinow()
     Wysyla serialem stany pinow zapisane w tablicy
@@ -34,7 +37,7 @@ void wyswietlStanyPinow(Pin wszystkiePiny[], size_t iloscPinow);
         nr pinu ktorego stan chcemy odczytac
     zwraca stan pinu wyjsciowego
 */
-byte podajStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
+byte zwrocStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 /* podajStanPinuAnalogowego
     argumenty:
@@ -43,7 +46,7 @@ byte podajStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu)
         nr pinu ktorego stan chcemy odczytac
      zwraca wartoœæ odczytana z pinu funkcja analogRead() jako procent z 0-5V (uzywa funkcji map())
 */
-uint32_t podajStanPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
+byte zwrocWartPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 /*  sprawdzNumerPinu()
     Sprawdza czy dana liczba jest numerem jednego z pinow zapisanych w tablicyPinow i jesli tak to czy jest to pin cyfrowy czy analogowy
@@ -96,6 +99,6 @@ void czestOdswEkranuTimerUstawienie();
 void przerwaniePrzyciskUstawienie();
 
 void obslugaLedowBledow(Pin* wszystkiePiny, byte iloscPinow, Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp);
-//void przerwanieBledyUstawienie();
+
 
 #endif

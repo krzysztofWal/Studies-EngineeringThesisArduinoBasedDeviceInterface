@@ -1,5 +1,31 @@
 #include "functions.h"
 
+
+/* ==== poczatkowe ustawienia peryferiow ==== */
+void przyciskTimerUstawienie() {
+    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
+    TCCR1B |= 3u; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybór preskalera /64
+    OCR1A = 62500; //wartoœc porównawcza (do 65 535)
+    /*
+    preskaler 64
+    1 cykl licznika -> 64/16MHz = 4000ns
+    4000ns x 16383 ~= 0,066 s
+    */
+}
+
+void czestOdswEkranuTimerUstawienie() {
+    TCCR2A = 0;
+    TCCR2B |= (7u); // 111 na bitach 2:0 - preskaler 1024
+    OCR2A = 0b11111110; //254 - compare value
+}
+
+void przerwaniePrzyciskUstawienie() {
+
+    PCMSK0 = (1 << PCINT0); //przerwanie PCINT0 na pinie 53
+    PCICR |= (1 << PCIE0); //pin change interrupt enable dla PCIE0
+}
+
+/* ==== obsluga wyswietlacza ====*/
 void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
     wyswietlacz.clrScr();
     wyswietlacz.setFont(font);
@@ -24,75 +50,53 @@ void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
     wyswietlacz.update();
 }
 
-void setNext(byte& trybWyswietlacza) {
-    if (trybWyswietlacza < 2) {
-        trybWyswietlacza++;
-    }
-    else {
-        trybWyswietlacza = 0;
-    }
-}
-
-void wyswietlStanyPinow(Pin wszystkiePiny[], size_t iloscPinow) {
-    for (size_t i = 0; i < iloscPinow; i++) {
-        uSend((wszystkiePiny + i)->rzeczywistyNrPinu);
-        uSend(" ");
-        if ((wszystkiePiny + i)->rodzajPinu == PIN_ANALOGOWY) {
-            uSend("A "); uSend(podajStanPinuAnalogowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu)); uSend("/100 V ");
+void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania) {
+    /* wyborZrodlaZasilania HIGH - tryby 0, 1, 2*/
+    /* stan niski - tryby 0, 1*/
+    uSend(trybWyswietlacza);
+    uSend(" ");
+    if (wyborZrodlaZasilania) {
+        if (trybWyswietlacza < 2) {
+            trybWyswietlacza++;
         } else {
-            uSend("D "); uSend(podajStanPinuCyfrowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
+            trybWyswietlacza = 0;
         }
-        uSend(" ");
-        uSend((wszystkiePiny + i)->opisPinu);
-        uSendLn();
-    }
-}
-
-byte podajStanPinuCyfrowego(Pin *wszystkiePiny, size_t iloscPinow, byte podanyNrPinu) {
-    for (size_t i = 0; i < iloscPinow; i++) {
-        if (podanyNrPinu == (wszystkiePiny + i)->rzeczywistyNrPinu) {
-            /*
-            uSend("podajStanPinuCyfrowego() ");uSend(" ");uSend(podanyNrPinu); uSendLn((stanyPinowCyfrowych + i)->nrPinu);
-            uSendLn((stanyPinowCyfrowych-+ 1)->stanPinu);
-            */
-            if ((wszystkiePiny + i)->inOut == INPUT) {
-                return digitalRead((wszystkiePiny + i)->rzeczywistyNrPinu);
-            }
-            else {
-                return (wszystkiePiny + i)->stanPinu;
-            }
+    } else {
+        if (trybWyswietlacza == 0) {
+            trybWyswietlacza = 2;
+        } else {
+            trybWyswietlacza = 0;
         }
-    }
+    } 
+    uSendLn(trybWyswietlacza);
+    /* */
 }
 
-uint32_t podajStanPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
-    return map(analogRead(nrPinu), 0, 1023, 0, 500);;
-}
-
-void odczytajWartosciADC(byte trybWyswietlacza,  byte *odczytaneWartosci) {
-    uint16_t pierwszaWartosc;
-    uint16_t drugaWartosc;
+void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, Pin* stanyPinowCyfrowych, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font, uint8_t* fontNapisy) {
+    // wyswietl(trybWyswietlacza, wyswietlacz, fontNapisy);
+    wyswietlacz.setFont(font);
     switch (trybWyswietlacza) {
     case 0:
-        pierwszaWartosc = map(analogRead(POW_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
-        drugaWartosc = map(analogRead(PRE_AMP_CUR_MON_PIN), 0, 1023,0, 100);
-        break;
     case 1:
-        pierwszaWartosc = map(analogRead(A_S_CUR_S_P_PIN), 0, 1023, 0, 100);
-        drugaWartosc = map(analogRead(S_C_S_P_PIN), 0, 1023,0 , 100);
-        break;
+
+        wyswietlacz.printNumI(odczytaneWartosci[0], WARTOSC_GORA_X, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[1], WARTOSC_GORA_X + 15, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[2], WARTOSC_GORA_X + 28, WARTOSC_GORA_Y);
+
+        wyswietlacz.printNumI(odczytaneWartosci[3], WARTOSC_DOL_X, WARTOSC_DOL_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[4], WARTOSC_DOL_X + 14, WARTOSC_DOL_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[5], WARTOSC_DOL_X + 27, WARTOSC_DOL_Y);
     case 2:
-        pierwszaWartosc = map(analogRead(BASE_PLATE_TEMP_MON_PIN), 0, 1023, 0, 100);
+        wyswietlacz.printNumI(odczytaneWartosci[0], WARTOSC_GORA_X, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[1], WARTOSC_GORA_X + 14, WARTOSC_GORA_Y);
+        wyswietlacz.printNumI(odczytaneWartosci[2], WARTOSC_GORA_X + 27, WARTOSC_GORA_Y);
         break;
     }
-    odczytaneWartosci[0] = pierwszaWartosc / 100;
-    odczytaneWartosci[1] = pierwszaWartosc / 10 - odczytaneWartosci[0] * 10;
-    odczytaneWartosci[2] = pierwszaWartosc % 10;
-    odczytaneWartosci[3] = drugaWartosc / 100;
-    odczytaneWartosci[4] = drugaWartosc / 10 - odczytaneWartosci[3] * 10;
-    odczytaneWartosci[5] = drugaWartosc % 10;
+    wyswietlacz.update();
+
 }
 
+/*==== obsluga komend ====*/
 byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow) {
     byte temp = PIN_NIE_ISTNIEJE;
     for (size_t i = 0; i < iloscPinow; i++) {
@@ -209,12 +213,59 @@ Pin* zmienStanPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu, byte now
     }
 }
 
+/*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
 void aktualizujTabeleStanow(Pin* wszystkiePiny, byte nowyStan) {
     wszystkiePiny->stanPinu = nowyStan;
-    /*
-    uSend("aktualizujTabeleStanow(): ");uSendLn(stanyPinowCyfrowych->stanPinu);
-    */
- }
+}
+
+/* ===== odcztywanie stanow pinow ==== */
+
+byte zwrocStanPinuCyfrowego(Pin* wszystkiePiny, size_t iloscPinow, byte podanyNrPinu) {
+    for (size_t i = 0; i < iloscPinow; i++) {
+        if (podanyNrPinu == (wszystkiePiny + i)->rzeczywistyNrPinu) {
+            /*
+            uSend("podajStanPinuCyfrowego() ");uSend(" ");uSend(podanyNrPinu); uSendLn((stanyPinowCyfrowych + i)->nrPinu);
+            uSendLn((stanyPinowCyfrowych-+ 1)->stanPinu);
+            */
+            if ((wszystkiePiny + i)->inOut == INPUT) {
+                return digitalRead((wszystkiePiny + i)->rzeczywistyNrPinu);
+            }
+            else {
+                return (wszystkiePiny + i)->stanPinu;
+            }
+        }
+    }
+}
+
+byte zwrocWartPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
+    return map(analogRead(nrPinu), 0, 1023, 0, 100);
+}
+
+void odczytajWartosciPinowAnalogowych(byte trybWyswietlacza, byte* odczytaneWartosci) {
+    uint16_t pierwszaWartosc;
+    uint16_t drugaWartosc;
+    switch (trybWyswietlacza) {
+    case 0:
+        pierwszaWartosc = map(analogRead(POW_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
+        drugaWartosc = map(analogRead(PRE_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
+        break;
+    case 1:
+        pierwszaWartosc = map(analogRead(A_S_CUR_S_P_PIN), 0, 1023, 0, 100);
+        drugaWartosc = map(analogRead(S_C_S_P_PIN), 0, 1023, 0, 100);
+        break;
+    case 2:
+        pierwszaWartosc = map(analogRead(BASE_PLATE_TEMP_MON_PIN), 0, 1023, 0, 100);
+        break;
+    }
+    odczytaneWartosci[0] = pierwszaWartosc / 100;
+    odczytaneWartosci[1] = pierwszaWartosc / 10 - odczytaneWartosci[0] * 10;
+    odczytaneWartosci[2] = pierwszaWartosc % 10;
+    odczytaneWartosci[3] = drugaWartosc / 100;
+    odczytaneWartosci[4] = drugaWartosc / 10 - odczytaneWartosci[3] * 10;
+    odczytaneWartosci[5] = drugaWartosc % 10;
+}
+
+/* ==== wyswietlanie tekstowe ==== */
 
 void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
     for (size_t i = 0; i < iloscPinow; i++) {
@@ -224,36 +275,30 @@ void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
     }
 }
 
-void przyciskTimerUstawienie() {
-    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
-    TCCR1B |= 3u ; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybór preskalera /64
-    OCR1A = 62500; //wartoœc porównawcza (do 65 535)
-    /*
-    preskaler 64
-    1 cykl licznika -> 64/16MHz = 4000ns
-    4000ns x 16383 ~= 0,066 s
-    */
+void wyswietlStanyPinow(Pin wszystkiePiny[], size_t iloscPinow) {
+    for (size_t i = 0; i < iloscPinow; i++) {
+        uSend((wszystkiePiny + i)->rzeczywistyNrPinu);
+        uSend(" : ");
+        if ((wszystkiePiny + i)->rodzajPinu == PIN_ANALOGOWY) {
+            uSend("A "); uSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
+        }
+        else {
+            uSend("D "); uSend(zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
+        }
+        uSend(" : ");
+        uSend((wszystkiePiny + i)->opisPinu);
+        uSendLn();
+    }
 }
 
-void czestOdswEkranuTimerUstawienie() {
-    TCCR2A = 0;
-    TCCR2B |= (7u); // 111 na bitach 2:0 - preskaler 1024
-    OCR2A = 0b11111110; //254 - compare value
-}
-
-void przerwaniePrzyciskUstawienie() {
-    
-    PCMSK0 = (1 << PCINT0); //przerwanie PCINT0 na pinie 53
-    PCICR |= (1 << PCIE0); //pin change interrupt enable dla PCIE0
-}
-
-/*w przypadku tej funkcji musi zachodzic 
+/* ==== ledy bledow ==== */
+/*w przypadku tej funkcji musi zachodzic
 ILOSC_PINOW_BLEDOW <= ilosci ledow */
-void obslugaLedowBledow(Pin *wszystkiePiny, byte iloscPinow, Pin *pinyBledow, byte *poprzedniStanPinowBledow, byte iloscPinowBledow, byte *ledNrPin, Adafruit_MCP23017 &mcp) {
+void obslugaLedowBledow(Pin* wszystkiePiny, byte iloscPinow, Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp) {
     for (size_t i = 0; i < iloscPinowBledow; i++) {
-        if (podajStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
+        if (zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
 
-            poprzedniStanPinowBledow[i] = podajStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu);
+            poprzedniStanPinowBledow[i] = zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu);
 
             if (poprzedniStanPinowBledow[i] == HIGH)
                 mcp.digitalWrite(ledNrPin[i], LOW);
@@ -262,4 +307,3 @@ void obslugaLedowBledow(Pin *wszystkiePiny, byte iloscPinow, Pin *pinyBledow, by
         }
     }
 }
-

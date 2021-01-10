@@ -9,13 +9,14 @@
 	#include "WProgram.h"
 #endif
 
-/*timer interrupt*/
+
+/*obsluga przycisku*/
 #define WARTOSC_WCZYTYWANA 0
 #define PRZYCISK_WCIAZ_WCISNIETY 2
 #define PRZYCISK_ZOSTAL_PUSZCZONY 1
 #define NIE_SPRAWDZAJ_STANU_PRZYCISKU 0
 
-
+/*wlaczanie i wylaczanie timerow*/
 #define PRZERWANIE_TIMER1_ON TIMSK1 = (1 << OCIE1A)
 #define PRZERWANIE_TIMER1_OFF TIMSK1 &= ~(1 << OCIE1A)
 #define PRZERWANIE_TIMER2_OFF TIMSK2 &= ~(1 << OCIE2A)
@@ -35,7 +36,8 @@
 #define LED_LASER_READY_PIN 14
 #define LED_LAS_EMIT_GATE_ENABLE_PIN 15//PB7
 
-/*ekran LCD*/
+/*wyswietlacz*/
+#define WYBOR_ZASILANIA_PIN 2
 #define PRZYCISK_PIN 53
 #define PRZYCISK_PORT PINB
 #define PRZYCISK_REJ_POZYCJA PB0
@@ -50,8 +52,10 @@
 #define WARTOSC_DOL_X 20
 #define WARTOSC_DOL_Y 33
 
+/*nie zmieniac bez modyfikacji funkcji odczytajWartosciADC - wykorzystuje ona bufor z szescioma wartosciami*/
+#define ILOSC_CYFR_ADC 6  
 
-/*piny "laserowe"*/
+/*piny sterujace laserem*/
 #define LASER_EMITION_GATE_PIN 14
 #define ALIGNMENT_LAS_ENABLE_PIN 15
 #define GLOBAL_ENABLE_PIN 16
@@ -68,12 +72,14 @@
 #define STATE_SEL_6_PIN 35
 #define STATE_SEL_7_PIN 37
 
+/*piny monitorujace*/
 #define BASE_PLATE_TEMP_MON_PIN 54
 #define PRE_AMP_CUR_MON_PIN 55
 #define POW_AMP_CUR_MON_PIN 56
 #define A_S_CUR_S_P_PIN 57
 #define S_C_S_P_PIN 58
  
+/*piny bledow*/
 #define POW_SUP_FAULT_PIN 62
 #define RESERVED_FAULT_PIN 63
 #define BEAM_COLL_FAULT_PIN 64
@@ -87,9 +93,9 @@
 patrz: funkcja obslugaLedowBledow()*/
 #define ILOSC_PINOW_BLEDOW 7
 #define ILOSC_LEDOW 10 
-#define WIELKOSC_BUFORA_SERIAL 5
+#define DLUGOSC_OPISU_PINOW 31
 
-/* zmienne funkcji */
+/* zwracane przez funkcje */
 
 #define WSZYSTKIE_PINY 255
 #define PIN_NIE_ISTNIEJE 0
@@ -98,15 +104,13 @@ patrz: funkcja obslugaLedowBledow()*/
 #define PIN_ANALOGOWY 1
 #define PIN_CYFROWY 4
 
+/* obsluga komend */
+#define WIELKOSC_BUFORA_SERIAL 5
 #define ODCZYTAJ_WSZYSTKIE 3
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
 #define ZMIEN_STAN_CYFROWEG0 0
 
-#define DLUGOSC_OPISU_PINOW 31
-
-/*nie zmieniac bez modyfikacji funkcji odczytajWartosciADC - wykorzystuje ona bufor z szescioma wartosciami*/
-#define ILOSC_CYFR_ADC 6  
 
 /* === */
 #define uSend Serial.print
@@ -114,6 +118,7 @@ patrz: funkcja obslugaLedowBledow()*/
 
 
 typedef struct {
+   //char przypisanyOpisPinu[3];
     byte rzeczywistyNrPinu;
     byte rodzajPinu;
     byte stanPinu;
