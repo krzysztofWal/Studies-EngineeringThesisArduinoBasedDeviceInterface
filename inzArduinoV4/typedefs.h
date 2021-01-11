@@ -105,7 +105,8 @@ patrz: funkcja obslugaLedowBledow()*/
 #define PIN_CYFROWY 4
 
 /* obsluga komend */
-#define WIELKOSC_BUFORA_SERIAL 5
+#define WIELKOSC_BUFORA_SERIAL 6
+#define WYLACZ_D 5
 #define ODCZYTAJ_WSZYSTKIE 3
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
@@ -115,7 +116,7 @@ patrz: funkcja obslugaLedowBledow()*/
 /* skroty metod klasy Serial */
 #define sSend Serial.print
 #define sSendLn Serial.println
-
+#define sSendLine Serial.println("====================================")
 
 typedef struct {
    //char przypisanyOpisPinu[3];
@@ -136,4 +137,3 @@ typedef struct {
 
 
 #endif
-

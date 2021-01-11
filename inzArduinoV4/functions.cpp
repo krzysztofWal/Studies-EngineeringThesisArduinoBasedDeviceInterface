@@ -2,9 +2,9 @@
 
 /* ==== poczatkowe ustawienia peryferiow ==== */
 void przyciskTimerUstawienie() {
-    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
-    TCCR1B |= 3u; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybór preskalera /64
-    OCR1A = 62500; //wartoœc porównawcza (do 65 535)
+    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaï¿½
+    TCCR1B |= 3u; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybï¿½r preskalera /64
+    OCR1A = 62500; //wartoï¿½c porï¿½wnawcza (do 65 535)
     /*
     preskaler 64
     1 cykl licznika -> 64/16MHz = 4000ns
@@ -51,7 +51,8 @@ void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
 
 void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania) {
     /* wyborZrodlaZasilania HIGH - tryby 0, 1, 2*/
-    /* stan niski - tryby 0, 1*/
+    /* stan niski - tryby 0, 2*/
+    sSend(trybWyswietlacza);
     if (wyborZrodlaZasilania) {
         if (trybWyswietlacza < 2) {
             trybWyswietlacza++;
@@ -65,6 +66,7 @@ void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania)
             trybWyswietlacza = 0;
         }
     } 
+    sSendLn(trybWyswietlacza);
 }
 
 void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font) {
@@ -100,7 +102,7 @@ void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz
 //        if (pierwszeWykrycieNacisnieciaPrzycisku) {
 //            /* wykrycie nacisniecia przycisku - wlaczanie pierwszego timera*/
 //            PRZERWANIE_PRZYCISK_OFF;
-//            TCNT1 = WARTOSC_WCZYTYWANA; //wartoœæ wczytywana przez timer na pocz¹tku odliczania
+//            TCNT1 = WARTOSC_WCZYTYWANA; //wartoï¿½ï¿½ wczytywana przez timer na poczï¿½tku odliczania
 //            PRZERWANIE_TIMER1_ON;
 //            pierwszeWykrycieNacisnieciaPrzycisku = 0;
 //        }
@@ -138,7 +140,6 @@ void obsluzKomende(Pin *wszystkiePiny, byte iloscPinow, char *bufor, Adafruit_MC
 
     while (i < WIELKOSC_BUFORA_SERIAL) {
         if (bufor[i] != 13) {
-            //sSendLn(bufor[i]);
             polecenie[i] = bufor[i];
             i++;
         }
@@ -146,60 +147,70 @@ void obsluzKomende(Pin *wszystkiePiny, byte iloscPinow, char *bufor, Adafruit_MC
             i = 6;
         }
     }
-
-    /*for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
-        sSend(polecenie[i]);
-    }*/
-    //sSendLn();
-
-    /* wpisana komenda jest prawidlowa */
-    if (sprawdzKomende(&sprawdzonePolecenie, polecenie, WIELKOSC_BUFORA_SERIAL, wszystkiePiny, iloscPinow)) {
-
-        if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
-            /* zmien stan pinu cyfrowego */
-            aktualizujStanPinu(zmienStanPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
-
-            /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
-
-            if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN) {
-                mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
-              
+  
+    if(polecenie[0] == 'd') {
+        byte temp = 0;
+        for (size_t i = 1; i < WIELKOSC_BUFORA_SERIAL; i++) {
+            if (polecenie[i] != 0) {
+                temp = 1;
             }
-            else if (sprawdzonePolecenie.nrPinu == LAS_DISABLE_PIN) {
-                mcp.digitalWrite(LED_LASER_DISABLE_PIN, sprawdzonePolecenie.nowyStan);
-            }
-
         }
-        else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
-            sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
-            wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
-            sSend(" ");sSend(" Stan: ");
-            if (zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)) {
-                sSendLn("HIGH");
+        if (temp == 0) {
+           aktualizujStanPinu(zmienStanPinu(wszystkiePiny, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
+           mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
+        }
+    } else {
+  
+        /* wpisana komenda jest prawidlowa */
+        if (sprawdzKomende(&sprawdzonePolecenie, polecenie, WIELKOSC_BUFORA_SERIAL, wszystkiePiny, iloscPinow)) {
+    
+            if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
+                /* zmien stan pinu cyfrowego */
+                aktualizujStanPinu(zmienStanPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
+    
+                /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
+    
+                if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN) {
+                    mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
+                  
+                }
+                else if (sprawdzonePolecenie.nrPinu == LAS_DISABLE_PIN) {
+                    mcp.digitalWrite(LED_LASER_DISABLE_PIN, sprawdzonePolecenie.nowyStan);
+                }
+    
+            }
+            else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
+                sSendLine;
+                sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
+                wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
+                sSend(" ");sSend(" Stan: ");
+                if (zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)) {
+                    sSendLn("HIGH");
+                }
+                else {
+                    sSendLn("LOW");
+                };
+                sSendLine;
+            }
+            else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY) {
+                sSendLine;
+                sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
+                wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
+                sSend(" "); sSend(" Wartosc: ");
+                sSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));
+                sSendLn("%");
+                sSendLine;
             }
             else {
-                sSend("LOW");
-            };
-
-        }
-        else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY) {
-            sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
-            wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
-            sSend(" "); sSend(" Wartosc: ");
-            sSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));
-            sSendLn("%");
+                wyswietlStanyWszystkichPinow(wszystkiePiny, iloscPinow);
+            }
+            
         }
         else {
-            wyswietlStanyWszystkichPinow(wszystkiePiny, iloscPinow);
+            /* Wpisana komenda jest nieprawidlowa */
+            sSendLn("Nieprawidlowa komenda");
         }
-
-        
     }
-    else {
-        /* Wpisana komenda jest nieprawidlowa */
-        sSendLn("Nieprawidlowa komenda");
-    }
-
 }
 
 byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow) {
@@ -287,13 +298,14 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
                     struktAdr->rodzajPolecenia = ODCZYTAJ_ANALOGOWY;
                     break;
                 case PIN_CYFROWY_WEJSCIE:
+                case PIN_CYFROWY_WYJSCIE:
                     struktAdr->rodzajPolecenia = ODCZYTAJ_CYFROWY;
                     break;
                 case WSZYSTKIE_PINY:
                     struktAdr->rodzajPolecenia = ODCZYTAJ_WSZYSTKIE;
                     break;
                 }
-                sSendLn(struktAdr->rodzajPolecenia);
+              //  sSendLn(struktAdr->rodzajPolecenia);
                 struktAdr->nowyStan = 0;
                 struktAdr->nrPinu = zwrocRzeczywistyNumerPinu(stanyPinowCyfrowych, iloscPinow ,tempPinNr);
                 return 1;
@@ -397,7 +409,7 @@ void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
 }
 
 void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow) {
-    sSendLn("================================");
+    sSendLine;
     for (size_t i = 0; i < iloscPinow; i++) {
         sSend((wszystkiePiny + i)->numerWyboru);
         sSend(" | ");
@@ -410,7 +422,7 @@ void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow) {
                 sSend("HIGH");
             }
             else {
-                sSend("LOW");
+                sSend("LOW ");
             }
         }
         sSend(" | ");
@@ -422,11 +434,11 @@ void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow) {
         case 5:
         case 13:
         case 20:
-            sSendLn("================================");
+            sSendLine;
         }
         
     }
-    sSendLn("================================");
+    sSendLine;
 }
 
 /* ==== ledy bledow ==== */

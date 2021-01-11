@@ -11,9 +11,10 @@
 
 #include "typedefs.h"
 #include "libraries/LCD5110_Graph/LCD5110_Graph.h"
-#include "avr/pgmspace.h"
-#include "libraries/Adafruit-MCP23017-Arduino-Library-master/Adafruit_MCP23017.h"
 
+#include "avr/pgmspace.h"
+//#include "libraries/Adafruit-MCP23017-Arduino-Library-master/Adafruit_MCP23017.h"
+#include "Adafruit_MCP23017.h"
 
 
 /* ==== poczatkowe ustawienia peryferiow ==== */
@@ -21,7 +22,7 @@
 void przyciskTimerUstawienie()
 Opis :
     Ustawia rejestry 16-to bitowego TIMER1 : TCCR1A, TCCR1B, OCR1A
-    Wybór preskalera oraz wartoœci porównawczej
+    Wybï¿½r preskalera oraz wartoï¿½ci porï¿½wnawczej
     Timer uzywany jest do usuwania drgan mechanicznych stykow przycisku
 Argumenty :
     -
@@ -35,7 +36,7 @@ void przyciskTimerUstawienie();
 void czestOdswEkranuTimerUstawienie()
 Opis :
     Ustawia rejestry 8-bitowego TIMER2 : TCCR1A, TCCR1B, OCR1A
-    Wybór preskalera 1024 oraz wartoœci porównawczej 254
+    Wybï¿½r preskalera 1024 oraz wartoï¿½ci porï¿½wnawczej 254
     Przy takich ustawieniach timer bedzie osiagal wartosc co  srednio 16.3 us
     Timer uzywany jest do cyklicznego odswiezania wartosci wyswietlanych na ekranie
 Argumenty :
@@ -51,7 +52,7 @@ void czestOdswEkranuTimerUstawienie();
 void czestOdswEkranuTimerUstawienie()
 Opis :
     Ustawia rejestry: PCMSK0, PCICR
-    Wykorzystuje tzw. Pin Change Interrupt, generowany na grupie pinów (PCI0), kiedy dowolny z nich zmieni stan. Wybrany do uruchomienia tego przerwania jest jednak tylko pin 53, do którego pod³¹czony jest przycisk. Nacisniecie przycisku powoduje wystapienie przerwania PCI0
+    Wykorzystuje tzw. Pin Change Interrupt, generowany na grupie pinï¿½w (PCI0), kiedy dowolny z nich zmieni stan. Wybrany do uruchomienia tego przerwania jest jednak tylko pin 53, do ktï¿½rego podï¿½ï¿½czony jest przycisk. Nacisniecie przycisku powoduje wystapienie przerwania PCI0
 Argumenty :
     -
 Funkcja zwraca:
@@ -65,15 +66,15 @@ void przerwaniePrzyciskUstawienie();
 /*
 void wyswietl()
 Opis :
-    Wyswietla opisy wyœwietlanych wartoœci dla danego trybu wyœwietlania, okreœlonego przez przekazywany parametr trybWyswietlacza
+    Wyswietla opisy wyï¿½wietlanych wartoï¿½ci dla danego trybu wyï¿½wietlania, okreï¿½lonego przez przekazywany parametr trybWyswietlacza
 Argumenty :
-    byte trybWyswietlacza - na jego podstawie wybierane s¹ wyœwietlane opisy
-    uint8_t *font - wskaŸnik do pierwszego elementu tablicy z u¿yt¹ do wyœwietlania czcionk¹ z pliku DefaultFonts.c znajduj¹cego sie w folderzeLCD5110_Graph
-    LCD5110& wyswietlacz - referencja do obiektu reprezentuj¹cego wyœwietlacz
+    byte trybWyswietlacza - na jego podstawie wybierane sï¿½ wyï¿½wietlane opisy
+    uint8_t *font - wskaï¿½nik do pierwszego elementu tablicy z uï¿½ytï¿½ do wyï¿½wietlania czcionkï¿½ z pliku DefaultFonts.c znajdujï¿½cego sie w folderzeLCD5110_Graph
+    LCD5110& wyswietlacz - referencja do obiektu reprezentujï¿½cego wyï¿½wietlacz
 Funkcja zwraca:
     -
 Uzywane funkcje:
-    metody klasy LCD5110 z zewnêtrznej biblioteki LCD5110_Graph,
+    metody klasy LCD5110 z zewnï¿½trznej biblioteki LCD5110_Graph,
     opisane w dokumentacji biblioteki znajdujacej sie w folderze projektowym:
         clrScr(),
         setFont(),
@@ -84,9 +85,9 @@ void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t* font);
 /*
 void przelaczTrybWyswietlacza()
 Opis :
-    Zmienia wartoœæ zmiennej trybWyswietlacza w zale¿noœci od przekazanej wartoœci zmiennej wyborZrodlaZasilania (1 albo 0)
+    Zmienia wartoï¿½ï¿½ zmiennej trybWyswietlacza w zaleï¿½noï¿½ci od przekazanej wartoï¿½ci zmiennej wyborZrodlaZasilania (1 albo 0)
     wyborZrodlaZasilania == 1 : tryby ..2->0->1->2->0...
-    wyborZrodlaZasilania  == 0 : tryby ..0->2->0.. lub 1->0->2->0->2.. (w zale¿noœci od pocz¹tkjowej wartoœci)
+    wyborZrodlaZasilania  == 0 : tryby ..0->2->0.. lub 1->0->2->0->2.. (w zaleï¿½noï¿½ci od poczï¿½tkjowej wartoï¿½ci)
 Argumenty :
     byte &trybWyswietlacza - modyfikowana zmienna
     byte wyborZrodlaZasilania - kryterium cyklu zmiany
@@ -99,16 +100,16 @@ void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania)
 /*
 void aktualizujWyswietlaneWartosci(),
 Opis :
-    w zale¿noœci od zmiennej trybWyswietlacza (pomiêdzy 0 - 2) odczytuje wartosci z tablicy, do której wskaŸnik jest przekazywanym parametrem i wyœwietla je na wyœwietlaczu, którego reprezentuj¹cy obiekt jest przekazany jako referencja
+    w zaleï¿½noï¿½ci od zmiennej trybWyswietlacza (pomiï¿½dzy 0 - 2) odczytuje wartosci z tablicy, do ktï¿½rej wskaï¿½nik jest przekazywanym parametrem i wyï¿½wietla je na wyï¿½wietlaczu, ktï¿½rego reprezentujï¿½cy obiekt jest przekazany jako referencja
 Argumenty :
-    byte* odczytaneWartosci - wskaŸnik do pierwszego elementu tablicy, z której odczytywane s¹ wartoœci
-    LCD5110& wyswietlacz - referencja do obiektu reprezentuj¹cego wyœwietlacz
-    uint8_t *font - wskaŸnik do pierwszego elementu tablicy z u¿yt¹ do wyœwietlania czcionk¹ z pliku DefaultFonts.c znajduj¹cego sie w folderzeLCD5110_Graph
-    byte trybWyswietlacza - na jego podstawie wybierany jest wyœwietlnay zestaw wartoœci
+    byte* odczytaneWartosci - wskaï¿½nik do pierwszego elementu tablicy, z ktï¿½rej odczytywane sï¿½ wartoï¿½ci
+    LCD5110& wyswietlacz - referencja do obiektu reprezentujï¿½cego wyï¿½wietlacz
+    uint8_t *font - wskaï¿½nik do pierwszego elementu tablicy z uï¿½ytï¿½ do wyï¿½wietlania czcionkï¿½ z pliku DefaultFonts.c znajdujï¿½cego sie w folderzeLCD5110_Graph
+    byte trybWyswietlacza - na jego podstawie wybierany jest wyï¿½wietlnay zestaw wartoï¿½ci
     Funkcja zwraca:
     -
 Uzywane funkcje:
-    metody klasy LCD5110 z zewnêtrznej biblioteki LCD5110_Graph,
+    metody klasy LCD5110 z zewnï¿½trznej biblioteki LCD5110_Graph,
     opisane w dokumentacji biblioteki znajdujacej sie w folderze projektowym:
         setFont(),
         printNumI(),
@@ -126,13 +127,13 @@ void obsluzKomende(Pin* wszystkiePiny, byte iloscPinow, char* bufor, Adafruit_MC
 
 /*  byte sprawdzNumerPinu()
 Opis :
-    Sprawdza czy dana liczba jest numerem "opisowym" jednego z pinow zapisanych w tablicyPinow i jeœli tak, to zwraca typ tego pinu
+    Sprawdza czy dana liczba jest numerem "opisowym" jednego z pinow zapisanych w tablicyPinow i jeï¿½li tak, to zwraca typ tego pinu
 Argumenty:
     byte liczba - potencjalny "opsiowy" numer pinu
-    Pin wszystkiePiny[] - wskaŸnik do tablicy zawieraj¹cej sprawdzane piny
-    size_t - iloœæ elementów w tablicy wszystkiePiny
+    Pin wszystkiePiny[] - wskaï¿½nik do tablicy zawierajï¿½cej sprawdzane piny
+    size_t - iloï¿½ï¿½ elementï¿½w w tablicy wszystkiePiny
 Funkcja zwraca:
-    (bute) wartoœæ z tych okreœlone makrami:
+    (bute) wartoï¿½ï¿½ z tych okreï¿½lone makrami:
     PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE albo PIN_NIE_ISTNIEJE
 Uzywane funkcje:
     -
@@ -141,46 +142,46 @@ byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow);
 
 /* byte sprawdzPolecenie()
  Opis:
-    zapisuje dane odczytane z komendy zapisanej w tablicy polecenie[] w instancji struktury typu Polecenie Info, której adres jest przekazywany
-    Aby polecenie by³o odczytane jako poprawne nie mo¿e zawieraæ ¿adnych innych znaków (spacji, tabulatury itp.)
-    Mo¿liwe polecenia:
-        ar - odczytaj wartoœci wszystkich pinów
-        NwX, gdzie N to numer pinu a X to '1' lub '0' - ustaw wyjœcie pinu cyfrowego
-        Nr - odczytaj wartoœæ N-tego pinu
+    zapisuje dane odczytane z komendy zapisanej w tablicy polecenie[] w instancji struktury typu Polecenie Info, ktï¿½rej adres jest przekazywany
+    Aby polecenie byï¿½o odczytane jako poprawne nie moï¿½e zawieraï¿½ ï¿½adnych innych znakï¿½w (spacji, tabulatury itp.)
+    Moï¿½liwe polecenia:
+        ar - odczytaj wartoï¿½ci wszystkich pinï¿½w
+        NwX, gdzie N to numer pinu a X to '1' lub '0' - ustaw wyjï¿½cie pinu cyfrowego
+        Nr - odczytaj wartoï¿½ï¿½ N-tego pinu
 
 Argumenty :
-    PolecenieInfo* struktAdr - wsk¿nik na instancjê struktury gdzie maja byc zapisane dane
-    char polecenie[] - wskaŸnik na pierwszy element tablicy z poleceniem
+    PolecenieInfo* struktAdr - wskï¿½nik na instancjï¿½ struktury gdzie maja byc zapisane dane
+    char polecenie[] - wskaï¿½nik na pierwszy element tablicy z poleceniem
     size_t dlugosc - dlugosc tablicy z poleceniem
-    Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy z danymi pinów
-    size_t iloscPinow - d³ugoœæ tablicy z danymi pinow (inaczej ilosc pinow)
+    Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy z danymi pinï¿½w
+    size_t iloscPinow - dï¿½ugoï¿½ï¿½ tablicy z danymi pinow (inaczej ilosc pinow)
 Funkcja zwraca :
-    1 - jeœli polecenie by³o nieprawid³owe
-    0 - jeœli komenda by³a niew³aœciwa
-U¿ywane funkcje:
+    1 - jeï¿½li polecenie byï¿½o nieprawidï¿½owe
+    0 - jeï¿½li komenda byï¿½a niewï¿½aï¿½ciwa
+Uï¿½ywane funkcje:
     byte sprawdzNumerPinu(byte, Pin* , size_t),
 Uwagi:
-    Algorytm dzia³ania:
-        Funkcja okreœla czy w podanym poleceniu na pierwszych pozycjach znajduje siê  numer pinu (funkcja obs³uguje numery 1 lub 2 cufrowe !) lub znak 'a'
-        Jeœli jest to 'a' to w polu instancji struktury rodzajPolecenia zapisywana jest wartoœæ okreœlona makrem ODCZYTAJ WSZYSTKIE
-        Jeœli numer pinu istnieje to w zale¿noœci od jego typu (PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE) sprawdzana jest poprawnoœæ polecenia wdg kryteriów:
-        - piny analogowe i wejœcia cyfrowe mo¿na tylko odczytaæ (jako rodzajPolecenia zapisywany jest ODCZYTAJ_ANALOGOWY lub ODCZYTAJ_CYFROWY)
-        - wyjœcia cyfrowe mo¿na odczytaæ i zmieniæ (ODCZYTAJ_CYFROWY albo ZMIEN_STAN CYFROWEGO)
-    W przypadku zmiany stanu wyjœcia cyfrowego, po¿¹dany stan (1 lub 0) jesgt wpisywany w pole struktury nowyStan
+    Algorytm dziaï¿½ania:
+        Funkcja okreï¿½la czy w podanym poleceniu na pierwszych pozycjach znajduje siï¿½  numer pinu (funkcja obsï¿½uguje numery 1 lub 2 cufrowe !) lub znak 'a'
+        Jeï¿½li jest to 'a' to w polu instancji struktury rodzajPolecenia zapisywana jest wartoï¿½ï¿½ okreï¿½lona makrem ODCZYTAJ WSZYSTKIE
+        Jeï¿½li numer pinu istnieje to w zaleï¿½noï¿½ci od jego typu (PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE) sprawdzana jest poprawnoï¿½ï¿½ polecenia wdg kryteriï¿½w:
+        - piny analogowe i wejï¿½cia cyfrowe moï¿½na tylko odczytaï¿½ (jako rodzajPolecenia zapisywany jest ODCZYTAJ_ANALOGOWY lub ODCZYTAJ_CYFROWY)
+        - wyjï¿½cia cyfrowe moï¿½na odczytaï¿½ i zmieniï¿½ (ODCZYTAJ_CYFROWY albo ZMIEN_STAN CYFROWEGO)
+    W przypadku zmiany stanu wyjï¿½cia cyfrowego, poï¿½ï¿½dany stan (1 lub 0) jesgt wpisywany w pole struktury nowyStan
 
 */
 byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin wszystkiePiny[], size_t iloscPinow);
 
 /* Pin* zmienStanPinu()
-    Zmienia stan na wybranym wyjœciu cyfrowym (nie dokonuje aktualizacji jego stanu w tablicy wszystkiePiny). Zak³ada, ¿e zosta³o sprawdzone, czy pin taki istnieje i jest wyjœciem cyfrowym.
+    Zmienia stan na wybranym wyjï¿½ciu cyfrowym (nie dokonuje aktualizacji jego stanu w tablicy wszystkiePiny). Zakï¿½ada, ï¿½e zostaï¿½o sprawdzone, czy pin taki istnieje i jest wyjï¿½ciem cyfrowym.
     Argumenty:
-        Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy, w któej znajduje siê pin, którego stan ma ulec zmianie
-        size_t iloscPinow - rozmiar powy¿szej 
-        byte nrPinu - nr pinu, na którym ma byæ zmieniony stan
-        byte nowyStan - po¿¹dany stan na okreœlonym wyjœciu
+        Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy, w ktï¿½ej znajduje siï¿½ pin, ktï¿½rego stan ma ulec zmianie
+        size_t iloscPinow - rozmiar powyï¿½szej 
+        byte nrPinu - nr pinu, na ktï¿½rym ma byï¿½ zmieniony stan
+        byte nowyStan - poï¿½ï¿½dany stan na okreï¿½lonym wyjï¿½ciu
     Funkcja zwraca:
-        (Pin *) wskaŸnik na element tablicy z pinami, którego stan zosta³ zmieniony
-    U¿ywane funkcje:
+        (Pin *) wskaï¿½nik na element tablicy z pinami, ktï¿½rego stan zostaï¿½ zmieniony
+    Uï¿½ywane funkcje:
         digitalWrite() - funkcja Arduino
 */
 Pin* zmienStanPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu, byte nowyStan);
@@ -192,12 +193,12 @@ byte zwrocNumerWyboru(Pin wszystkiePiny[], size_t iloscPinow, byte rzeczywistyNr
 /*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
 /*void aktualizujTabeleStanow()
 Opis:
-    Zmienia wartoœæ stanu pinu zapisanego w tablicy wszystkiePiny (tj. zmienia wartoœæ zapisan¹ w tablicy, a nie t¹ "rzeczywist¹" - patrz: funkcja zmienStanPinu()); zak³ada, ¿e pin taki istnieje i jest cyfrowym wyjœciem
+    Zmienia wartoï¿½ï¿½ stanu pinu zapisanego w tablicy wszystkiePiny (tj. zmienia wartoï¿½ï¿½ zapisanï¿½ w tablicy, a nie tï¿½ "rzeczywistï¿½" - patrz: funkcja zmienStanPinu()); zakï¿½ada, ï¿½e pin taki istnieje i jest cyfrowym wyjï¿½ciem
 Argumenty:
-    Pin* wszystkiePiny - wskaŸnik na pin (element w tablicy), którego zapisany w niej stan ma byæ zmieniony
+    Pin* wszystkiePiny - wskaï¿½nik na pin (element w tablicy), ktï¿½rego zapisany w niej stan ma byï¿½ zmieniony
 Funkcja zwraca:
     -
-U¿ywane funkcje:
+Uï¿½ywane funkcje:
     -
 */
 void aktualizujStanPinu(Pin* wszystkiePiny, byte nowyStan);
@@ -205,29 +206,29 @@ void aktualizujStanPinu(Pin* wszystkiePiny, byte nowyStan);
 /* ===== odcztywanie stanow pinow ==== */
 /* byte zwrocStanPinuCyfrowego()
  Opis:
-    Zwraca stan logiczny pinu odczytany funkcj¹ digitalRead() - w przypadku wejœcia - lub z tablicy wszystkiePiny - w przypadku wyjœcia; zak³ada, ¿e pin jest cyfrowy i znajduje siê w  tablicy
+    Zwraca stan logiczny pinu odczytany funkcjï¿½ digitalRead() - w przypadku wejï¿½cia - lub z tablicy wszystkiePiny - w przypadku wyjï¿½cia; zakï¿½ada, ï¿½e pin jest cyfrowy i znajduje siï¿½ w  tablicy
  Argumenty:
-        Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy pinów
-        size_t iloscPinow - rozmiar powy¿szej
-        byte nrPinu - nr pinu którego stan logiczny ma zwróciæ
+        Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy pinï¿½w
+        size_t iloscPinow - rozmiar powyï¿½szej
+        byte nrPinu - nr pinu ktï¿½rego stan logiczny ma zwrï¿½ciï¿½
 Funkcja zwraca:
     (byte) odczytany stan (HIGH albo LOW)
-U¿ywane funkcje:
-    (w zale¿noœci od tego, czy pin jest wejœciem czy wyjœciem)
+Uï¿½ywane funkcje:
+    (w zaleï¿½noï¿½ci od tego, czy pin jest wejï¿½ciem czy wyjï¿½ciem)
     digtalRead() - funkcja Arduino 
 */
 byte zwrocStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 
 /* byte zwrocWartoscPinuAnalogowego()
  Opis:
-      zwraca wartoœæ odczytan¹ funkcj¹ analogRead() jako procent z 0-5V (uzywa funkcji map()); zak³ada, ¿e pin znajduje siê w tablicy
+      zwraca wartoï¿½ï¿½ odczytanï¿½ funkcjï¿½ analogRead() jako procent z 0-5V (uzywa funkcji map()); zakï¿½ada, ï¿½e pin znajduje siï¿½ w tablicy
  Argumenty:
-        Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy pinów, w której znajduje siê
-        size_t iloscPinow - iloœæ elementów w tablicy
-        nrPinu - nr pinu którego wartoœæ ma byæ odczytana
+        Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy pinï¿½w, w ktï¿½rej znajduje siï¿½
+        size_t iloscPinow - iloï¿½ï¿½ elementï¿½w w tablicy
+        nrPinu - nr pinu ktï¿½rego wartoï¿½ï¿½ ma byï¿½ odczytana
 Funkcja zwraca:
-    (byte) odczyt z pinu analogowego przeskalowany pomiêdzy wartoœci 0-100
-U¿ywane funkcje:
+    (byte) odczyt z pinu analogowego przeskalowany pomiï¿½dzy wartoï¿½ci 0-100
+Uï¿½ywane funkcje:
     funkcje Arduino:
     analogRead(),
     map()
@@ -236,14 +237,14 @@ byte zwrocWartPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPin
 
 /* void odczytajWartosciPinowAnalogowych
 Opis:
-    !- zak³ada, ¿e tablica odczytaneWartosci ma minimum 6 wyrazów -!
-    Odczytuje wybrane wartoœci odczytane z: POW_AMP_CUR_MON_PIN, PRE_AMP_CUR_MON_PIN, A_S_CUR_S_P_PIN, S_C_S_P_PIN, BASE_PLATE_TEMP_MON_PIN (w zale¿noœci od wartoœci zmiennej trybWyswietlacza - w zakresie 0-2), skaluje je do zakresu 0-100 i ich cyfry zapisuje w elementach tablicy odczytaneWartoœci
+    !- zakï¿½ada, ï¿½e tablica odczytaneWartosci ma minimum 6 wyrazï¿½w -!
+    Odczytuje wybrane wartoï¿½ci odczytane z: POW_AMP_CUR_MON_PIN, PRE_AMP_CUR_MON_PIN, A_S_CUR_S_P_PIN, S_C_S_P_PIN, BASE_PLATE_TEMP_MON_PIN (w zaleï¿½noï¿½ci od wartoï¿½ci zmiennej trybWyswietlacza - w zakresie 0-2), skaluje je do zakresu 0-100 i ich cyfry zapisuje w elementach tablicy odczytaneWartoï¿½ci
 Argumenty:
-     byte trybWyswietlacza - od jej wartoœci (0-2) zale¿y, które wartoœci zostan¹ wpisane do tablicy
-     byte *odczytaneWartosci - wskaŸnik na pierwszy element tablicy odczytaneWartosci
+     byte trybWyswietlacza - od jej wartoï¿½ci (0-2) zaleï¿½y, ktï¿½re wartoï¿½ci zostanï¿½ wpisane do tablicy
+     byte *odczytaneWartosci - wskaï¿½nik na pierwszy element tablicy odczytaneWartosci
 Funkcja zwraca:
     -
-U¿ywane funkcje:
+Uï¿½ywane funkcje:
     funkcje Arduino:
         analogRead(),
         map()
@@ -254,13 +255,13 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci);
 
 /*  void wyswietlStanyPinow()
  Opis:
-    Wysy³a po³¹czeniem szeregowym stany wszystkich pinów zawartych w tablicy wszytkiePiny. Do odczytania tych stanów u¿ywa funkcji zwrocWartoscPinuAnalogowego() oraz zwrocWartoscPinuCyfrowego(). Zak³ada, ¿e komunnikacja szeregowa zosta³a zainicjowana
+    Wysyï¿½a poï¿½ï¿½czeniem szeregowym stany wszystkich pinï¿½w zawartych w tablicy wszytkiePiny. Do odczytania tych stanï¿½w uï¿½ywa funkcji zwrocWartoscPinuAnalogowego() oraz zwrocWartoscPinuCyfrowego(). Zakï¿½ada, ï¿½e komunnikacja szeregowa zostaï¿½a zainicjowana
 Argumenty
-    Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy z zawaratymi informacjami o pinach
+    Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy z zawaratymi informacjami o pinach
     size_t iloscPinow - rozmiar tej tablicy
 Funkcja zwraca:
     -
-U¿ywane funkcje:
+Uï¿½ywane funkcje:
     byte zwrocStanPinuAnalogowego(),
     byte zwrocStanPinuCyfrowego(),
     print(), println() - metody klasy Serial (Arduino)
@@ -269,14 +270,14 @@ void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow);
 
 /* void wyswietlOpisPinu() 
 Opis:
-    Wysy³a po³¹czeniem szeregowym opis wybranego pinu zawarty w tablicy wszytkiePiny. . Zak³ada, ¿e komunnikacja szeregowa zosta³a zainicjowana oraz, ¿e pin znajduje siê w tej tablicy
+    Wysyï¿½a poï¿½ï¿½czeniem szeregowym opis wybranego pinu zawarty w tablicy wszytkiePiny. . Zakï¿½ada, ï¿½e komunnikacja szeregowa zostaï¿½a zainicjowana oraz, ï¿½e pin znajduje siï¿½ w tej tablicy
 Argumenty:
-    Pin wszystkiePiny[] - wskaŸnik na pierwszy element tablicy z zawartym opisem pinu
-    size_t iloscPinow - iloœæ elementów w tablicy
-    byte nrPinu - numer pinu, którego opis ma byæ przes³any
+    Pin wszystkiePiny[] - wskaï¿½nik na pierwszy element tablicy z zawartym opisem pinu
+    size_t iloscPinow - iloï¿½ï¿½ elementï¿½w w tablicy
+    byte nrPinu - numer pinu, ktï¿½rego opis ma byï¿½ przesï¿½any
 Funkcja zwraca:
     -
-U¿ywane funkcje:
+Uï¿½ywane funkcje:
     print() - metoda klasy Serial (Arduino)
 */
 void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
@@ -285,20 +286,20 @@ void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
 /*void obslugaLedowBledow
 Opis:
     !- w przypadku tej funkcji musi zachodzic liczba elementow tablicy pinyBledow <= liczba elemntow tablicy ledNrPin -!
-    Sprawdza czy na pinach spoœród tych zapisanych w tablicy pinyBledow nast¹pi³a zmiana od ostatniego sprawdzenia (wartoœci w tablicy poprzedniStanPinowBledow). Jesli tak by³o, to zmienia odpowiednio stan LEDów (o iloœci równej wartosci iloscPinowB³êdow) pod³¹czonych kolejno do  pocz¹tkowych pinów (znajdujacych sie w tablicy ledNrPin) ekspandera (mcp)
-    Modyfikuje równie¿ tablicê poprzedniStanPinowBledow przypisuj¹c jej odczytane wartosci
-    Zak³ada, ¿e obydwie tablice s¹ tych samych rozmiarów
+    Sprawdza czy na pinach spoï¿½rï¿½d tych zapisanych w tablicy pinyBledow nastï¿½piï¿½a zmiana od ostatniego sprawdzenia (wartoï¿½ci w tablicy poprzedniStanPinowBledow). Jesli tak byï¿½o, to zmienia odpowiednio stan LEDï¿½w (o iloï¿½ci rï¿½wnej wartosci iloscPinowBï¿½ï¿½dow) podï¿½ï¿½czonych kolejno do  poczï¿½tkowych pinï¿½w (znajdujacych sie w tablicy ledNrPin) ekspandera (mcp)
+    Modyfikuje rï¿½wnieï¿½ tablicï¿½ poprzedniStanPinowBledow przypisujï¿½c jej odczytane wartosci
+    Zakï¿½ada, ï¿½e obydwie tablice sï¿½ tych samych rozmiarï¿½w
 Argumenty:
-    Pin* pinyBledow - wskaŸnik do pierwszego elementu tablicy ze sprawdzanymi pinami
-    byte* poprzedniStanPinowBledow - wskaŸnik do pierwszego elementu tablicy, z której brane s¹ stany porównawcze 
-    byte iloscPinowBledow - iloœæ elementów w obydwu tablicach
-    byte* ledNrPin - wskaŸnik na pierwszy element tablicy, gdzie znajduj¹ siê nr pinów ekspandera, do których pod³¹czone s¹ LEDy
-    Adafruit_MCP23017& mcp - referencja na obiekt reprezentuj¹cy ekspander
+    Pin* pinyBledow - wskaï¿½nik do pierwszego elementu tablicy ze sprawdzanymi pinami
+    byte* poprzedniStanPinowBledow - wskaï¿½nik do pierwszego elementu tablicy, z ktï¿½rej brane sï¿½ stany porï¿½wnawcze 
+    byte iloscPinowBledow - iloï¿½ï¿½ elementï¿½w w obydwu tablicach
+    byte* ledNrPin - wskaï¿½nik na pierwszy element tablicy, gdzie znajdujï¿½ siï¿½ nr pinï¿½w ekspandera, do ktï¿½rych podï¿½ï¿½czone sï¿½ LEDy
+    Adafruit_MCP23017& mcp - referencja na obiekt reprezentujï¿½cy ekspander
 Funkcja zwraca:
     -
-U¿ywane funkcje:
+Uï¿½ywane funkcje:
     zwrocStanPinuCyfrowego(),
-    digitalWrite() - metoda klasy Adafruit_MCP23017 wprowadzaj¹ca pin ekspandera w okreœlony stan
+    digitalWrite() - metoda klasy Adafruit_MCP23017 wprowadzajï¿½ca pin ekspandera w okreï¿½lony stan
 */
 
 void obslugaLedowBledow(Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp);
