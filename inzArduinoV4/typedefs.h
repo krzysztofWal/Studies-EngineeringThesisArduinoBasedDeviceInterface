@@ -52,7 +52,7 @@
 #define WARTOSC_DOL_X 20
 #define WARTOSC_DOL_Y 33
 
-/*nie zmieniac bez modyfikacji funkcji odczytajWartosciADC - wykorzystuje ona bufor z szescioma wartosciami*/
+/*nie zmieniac bez modyfikacji funkcji odczytajWartosciADC - wykorzystuje ona tablice z szescioma wartosciami*/
 #define ILOSC_CYFR_ADC 6  
 
 /*piny sterujace laserem*/
@@ -112,14 +112,15 @@ patrz: funkcja obslugaLedowBledow()*/
 #define ZMIEN_STAN_CYFROWEG0 0
 
 
-/* === */
-#define uSend Serial.print
-#define uSendLn Serial.println
+/* skroty metod klasy Serial */
+#define sSend Serial.print
+#define sSendLn Serial.println
 
 
 typedef struct {
    //char przypisanyOpisPinu[3];
     byte rzeczywistyNrPinu;
+    byte numerWyboru;
     byte rodzajPinu;
     byte stanPinu;
     char opisPinu[DLUGOSC_OPISU_PINOW];

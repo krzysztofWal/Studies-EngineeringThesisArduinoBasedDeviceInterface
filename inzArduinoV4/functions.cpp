@@ -1,6 +1,5 @@
 #include "functions.h"
 
-
 /* ==== poczatkowe ustawienia peryferiow ==== */
 void przyciskTimerUstawienie() {
     TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiaæ
@@ -53,8 +52,6 @@ void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
 void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania) {
     /* wyborZrodlaZasilania HIGH - tryby 0, 1, 2*/
     /* stan niski - tryby 0, 1*/
-    uSend(trybWyswietlacza);
-    uSend(" ");
     if (wyborZrodlaZasilania) {
         if (trybWyswietlacza < 2) {
             trybWyswietlacza++;
@@ -68,11 +65,9 @@ void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania)
             trybWyswietlacza = 0;
         }
     } 
-    uSendLn(trybWyswietlacza);
-    /* */
 }
 
-void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, Pin* stanyPinowCyfrowych, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font, uint8_t* fontNapisy) {
+void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font) {
     // wyswietl(trybWyswietlacza, wyswietlacz, fontNapisy);
     wyswietlacz.setFont(font);
     switch (trybWyswietlacza) {
@@ -96,11 +91,121 @@ void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, Pin* stanyPinowCyfro
 
 }
 
+/* ==== obslugaPrzycisku ====*/
+/* !- modyfikuje zmienne globalne stanPrzycisku i przerwaniePrzycisku !- */
+//byte obsluzPrzycisk(byte&  pierwszeWykrycieNacisnieciaPrzycisku) {
+//
+//    if (przerwaniePrzycisk) {
+//
+//        if (pierwszeWykrycieNacisnieciaPrzycisku) {
+//            /* wykrycie nacisniecia przycisku - wlaczanie pierwszego timera*/
+//            PRZERWANIE_PRZYCISK_OFF;
+//            TCNT1 = WARTOSC_WCZYTYWANA; //wartoœæ wczytywana przez timer na pocz¹tku odliczania
+//            PRZERWANIE_TIMER1_ON;
+//            pierwszeWykrycieNacisnieciaPrzycisku = 0;
+//        }
+//
+//        if (stanPrzycisku != NIE_SPRAWDZAJ_STANU_PRZYCISKU) {
+//            PRZERWANIE_TIMER2_OFF;
+//            PRZERWANIE_TIMER1_OFF;
+//            if (stanPrzycisku == PRZYCISK_WCIAZ_WCISNIETY) {
+//                stanPrzycisku = NIE_SPRAWDZAJ_STANU_PRZYCISKU;
+//                pierwszeWykrycieNacisnieciaPrzycisku = 1;
+//                PRZERWANIE_PRZYCISK_ON;
+//                przerwaniePrzycisk = 0;
+//                return 1;
+//            }
+//            stanPrzycisku = NIE_SPRAWDZAJ_STANU_PRZYCISKU;
+//            pierwszeWykrycieNacisnieciaPrzycisku = 1;
+//            PRZERWANIE_PRZYCISK_ON;
+//            przerwaniePrzycisk = 0;
+//        }
+//        return 0;
+//    }
+//
+//}
+
 /*==== obsluga komend ====*/
+void obsluzKomende(Pin *wszystkiePiny, byte iloscPinow, char *bufor, Adafruit_MCP23017& mcp) {
+
+    size_t i = 0;
+    char polecenie[WIELKOSC_BUFORA_SERIAL];
+    PolecenieInfo sprawdzonePolecenie;
+
+    for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
+        polecenie[i] = 0;
+    }
+
+    while (i < WIELKOSC_BUFORA_SERIAL) {
+        if (bufor[i] != 13) {
+            //sSendLn(bufor[i]);
+            polecenie[i] = bufor[i];
+            i++;
+        }
+        else {
+            i = 6;
+        }
+    }
+
+    /*for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
+        sSend(polecenie[i]);
+    }*/
+    //sSendLn();
+
+    /* wpisana komenda jest prawidlowa */
+    if (sprawdzKomende(&sprawdzonePolecenie, polecenie, WIELKOSC_BUFORA_SERIAL, wszystkiePiny, iloscPinow)) {
+
+        if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
+            /* zmien stan pinu cyfrowego */
+            aktualizujStanPinu(zmienStanPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
+
+            /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
+
+            if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN) {
+                mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
+              
+            }
+            else if (sprawdzonePolecenie.nrPinu == LAS_DISABLE_PIN) {
+                mcp.digitalWrite(LED_LASER_DISABLE_PIN, sprawdzonePolecenie.nowyStan);
+            }
+
+        }
+        else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
+            sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
+            wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
+            sSend(" ");sSend(" Stan: ");
+            if (zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)) {
+                sSendLn("HIGH");
+            }
+            else {
+                sSend("LOW");
+            };
+
+        }
+        else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY) {
+            sSend("Pin nr: ");sSend(zwrocNumerWyboru(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
+            wyswietlOpisPinu(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu);
+            sSend(" "); sSend(" Wartosc: ");
+            sSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, sprawdzonePolecenie.nrPinu));
+            sSendLn("%");
+        }
+        else {
+            wyswietlStanyWszystkichPinow(wszystkiePiny, iloscPinow);
+        }
+
+        
+    }
+    else {
+        /* Wpisana komenda jest nieprawidlowa */
+        sSendLn("Nieprawidlowa komenda");
+    }
+
+}
+
 byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow) {
     byte temp = PIN_NIE_ISTNIEJE;
     for (size_t i = 0; i < iloscPinow; i++) {
-        if (liczba == (wszystkiePiny + i)->rzeczywistyNrPinu) {
+        if (liczba == (wszystkiePiny + i)->numerWyboru) {
             if ((wszystkiePiny + i)->rodzajPinu == PIN_CYFROWY) {
                 if ((wszystkiePiny + i)->inOut == INPUT) {
                     temp = PIN_CYFROWY_WEJSCIE;
@@ -112,13 +217,13 @@ byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow) {
             }
 
             break;
-            /* przerwij petle jesli znalazles */
+            /* przerwanie petli jesli znaleziono */
         }
     }
     return temp;
 }
 
-byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin stanyPinowCyfrowych[], size_t iloscPinow) {
+byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin stanyPinowCyfrowych[], size_t iloscPinow) {
     size_t tempIndeks = 0;
     byte tempPinNr = 0; //255 - wszystkie piny
     byte analogowyCzyCyfrowy = 3;
@@ -128,12 +233,9 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         tempIndeks++;
     }
    
-    /*policz jaki to numer, najwiekszy mozliwy to 2-cyfrowy */
+    /*policz numer, najwiekszy mozliwy to 2-cyfrowy */
     if (tempIndeks == 2) {
         tempPinNr += *(polecenie + 1) - 48 + (*polecenie - 48) * 10;
-        /*
-        uSend("sprawdzPolecenie(): numer pinu"); uSend(tempPinNr);uSendLn();
-        */
     }
     else if (tempIndeks == 1) {
         tempPinNr += (*polecenie - 48);
@@ -166,7 +268,7 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                     polecenie[tempIndeks + 2] == 0) {
                 struktAdr->rodzajPolecenia = ZMIEN_STAN_CYFROWEG0;
                 struktAdr->nowyStan = polecenie[tempIndeks + 1] - 48;
-                struktAdr->nrPinu = tempPinNr;
+                struktAdr->nrPinu = struktAdr->nrPinu = zwrocRzeczywistyNumerPinu(stanyPinowCyfrowych, iloscPinow, tempPinNr);
                 return 1;
             } else {
                 return 0;
@@ -191,8 +293,9 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
                     struktAdr->rodzajPolecenia = ODCZYTAJ_WSZYSTKIE;
                     break;
                 }
+                sSendLn(struktAdr->rodzajPolecenia);
                 struktAdr->nowyStan = 0;
-                struktAdr->nrPinu = tempPinNr;
+                struktAdr->nrPinu = zwrocRzeczywistyNumerPinu(stanyPinowCyfrowych, iloscPinow ,tempPinNr);
                 return 1;
             } else {
                 return 0;
@@ -200,6 +303,8 @@ byte sprawdzPolecenie(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc
         } else {
             return 0;
         }
+
+        
     }
 
 }
@@ -213,14 +318,30 @@ Pin* zmienStanPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu, byte now
     }
 }
 
+byte zwrocRzeczywistyNumerPinu(Pin wszystkiePiny[], size_t iloscPinow, byte numerWyboru) {
+    for (size_t i = 0; i < iloscPinow; i++) {
+        if (wszystkiePiny[i].numerWyboru == numerWyboru) {
+            return wszystkiePiny[i].rzeczywistyNrPinu;
+        }
+    }
+}
+
+byte zwrocNumerWyboru(Pin wszystkiePiny[], size_t iloscPinow, byte rzeczywistyNrPinu) {
+    for (size_t i = 0; i < iloscPinow; i++) {
+        if (wszystkiePiny[i].rzeczywistyNrPinu == rzeczywistyNrPinu) {
+            return wszystkiePiny[i].numerWyboru;
+        }
+    }
+}
+
 /*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
-void aktualizujTabeleStanow(Pin* wszystkiePiny, byte nowyStan) {
+void aktualizujStanPinu(Pin* wszystkiePiny, byte nowyStan) {
     wszystkiePiny->stanPinu = nowyStan;
 }
 
 /* ===== odcztywanie stanow pinow ==== */
 
-byte zwrocStanPinuCyfrowego(Pin* wszystkiePiny, size_t iloscPinow, byte podanyNrPinu) {
+byte zwrocStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte podanyNrPinu) {
     for (size_t i = 0; i < iloscPinow; i++) {
         if (podanyNrPinu == (wszystkiePiny + i)->rzeczywistyNrPinu) {
             /*
@@ -241,7 +362,7 @@ byte zwrocWartPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPin
     return map(analogRead(nrPinu), 0, 1023, 0, 100);
 }
 
-void odczytajWartosciPinowAnalogowych(byte trybWyswietlacza, byte* odczytaneWartosci) {
+void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci) {
     uint16_t pierwszaWartosc;
     uint16_t drugaWartosc;
     switch (trybWyswietlacza) {
@@ -270,35 +391,52 @@ void odczytajWartosciPinowAnalogowych(byte trybWyswietlacza, byte* odczytaneWart
 void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu) {
     for (size_t i = 0; i < iloscPinow; i++) {
         if ((wszystkiePiny + i)->rzeczywistyNrPinu == nrPinu) {
-            uSend((wszystkiePiny + i)->opisPinu);
+            sSend((wszystkiePiny + i)->opisPinu);
         }
     }
 }
 
-void wyswietlStanyPinow(Pin wszystkiePiny[], size_t iloscPinow) {
+void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow) {
+    sSendLn("================================");
     for (size_t i = 0; i < iloscPinow; i++) {
-        uSend((wszystkiePiny + i)->rzeczywistyNrPinu);
-        uSend(" : ");
+        sSend((wszystkiePiny + i)->numerWyboru);
+        sSend(" | ");
         if ((wszystkiePiny + i)->rodzajPinu == PIN_ANALOGOWY) {
-            uSend("A "); uSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
-        }
+            sSend(zwrocWartPinuAnalogowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
+            sSend("%");
+        } 
         else {
-            uSend("D "); uSend(zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu));
+            if ((zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, (wszystkiePiny + i)->rzeczywistyNrPinu))) {
+                sSend("HIGH");
+            }
+            else {
+                sSend("LOW");
+            }
         }
-        uSend(" : ");
-        uSend((wszystkiePiny + i)->opisPinu);
-        uSendLn();
+        sSend(" | ");
+        sSend((wszystkiePiny + i)->opisPinu);
+        sSendLn();
+
+        switch (i) {
+        case 4:
+        case 5:
+        case 13:
+        case 20:
+            sSendLn("================================");
+        }
+        
     }
+    sSendLn("================================");
 }
 
 /* ==== ledy bledow ==== */
 /*w przypadku tej funkcji musi zachodzic
 ILOSC_PINOW_BLEDOW <= ilosci ledow */
-void obslugaLedowBledow(Pin* wszystkiePiny, byte iloscPinow, Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp) {
+void obslugaLedowBledow(Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp) {
     for (size_t i = 0; i < iloscPinowBledow; i++) {
-        if (zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
+        if (zwrocStanPinuCyfrowego(pinyBledow, iloscPinowBledow, pinyBledow[i].rzeczywistyNrPinu) != poprzedniStanPinowBledow[i]) {
 
-            poprzedniStanPinowBledow[i] = zwrocStanPinuCyfrowego(wszystkiePiny, iloscPinow, pinyBledow[i].rzeczywistyNrPinu);
+            poprzedniStanPinowBledow[i] = zwrocStanPinuCyfrowego(pinyBledow, iloscPinowBledow, pinyBledow[i].rzeczywistyNrPinu);
 
             if (poprzedniStanPinowBledow[i] == HIGH)
                 mcp.digitalWrite(ledNrPin[i], LOW);

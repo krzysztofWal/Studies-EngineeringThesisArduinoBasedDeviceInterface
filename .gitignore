@@ -13,5 +13,5 @@
 /PythonRepo
 /SprawdzanieRzeczyCppPrzedEgzaminem
 /Test
-**/Debug
+#**/Debug
 **/*.vs
