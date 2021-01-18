@@ -6,7 +6,7 @@ volatile byte przerwaniePrzycisk = 0;
 volatile byte stanPrzycisku = 0;
 volatile byte naliczoneCykleTimerDrugi = 0;
 
-/*funkce przerwan*/
+/*funkcje przerwań*/
 ISR(TIMER1_COMPA_vect) {
     if (bit_is_set(PRZYCISK_PORT, PRZYCISK_REJ_POZYCJA)) { // bit jest 1 - przycisk przycisniety
         stanPrzycisku = PRZYCISK_WCIAZ_WCISNIETY;
@@ -28,14 +28,14 @@ ISR(PCINT0_vect) {
 void setup()
 {	
 	/* ======== deklaracje i definicje zmiennych ======== */ 
-    /*komunikacja z komputerem*/
-    Serial.begin(9600);
+    /*obsluga komunikacji z komputerem*/
     char bufor[WIELKOSC_BUFORA_SERIAL];
     bool buforPelny = false;
     byte index = 0;
 
+	/* obsluga pinow (wejsc i wyjsc z lasera)*/
     Pin pinyBledow[ILOSC_PINOW_BLEDOW] = {
-        {POW_SUP_FAULT_PIN, 30, PIN_CYFROWY, 0, "Power supply fault [when 0]", INPUT},
+        {POW_SUP_FAULT_PIN, 30, PIN_CYFROWY, 0, "Power supply fault [when LOW]", INPUT},
         {RESERVED_FAULT_PIN, 31, PIN_CYFROWY, 0, "Reserved fault", INPUT},
         {BEAM_COLL_FAULT_PIN, 32, PIN_CYFROWY, 0, "Beam collimator fault", INPUT},
         {POW_AMP_CUR_FAULT_PIN, 33, PIN_CYFROWY, 0, "Power-amp current fault", INPUT},
@@ -46,14 +46,13 @@ void setup()
 
     byte poprzedniStanPinowBledow[ILOSC_PINOW_BLEDOW];
 
-    Pin laserReady = { LASER_READY_PIN, 15, PIN_CYFROWY, 0, "Laser ready [when 1]", INPUT };
+    Pin laserReady = { LASER_READY_PIN, 15, PIN_CYFROWY, 0, "Laser ready [when HIGH]", INPUT };
 
     byte poprzedniStanLaserReady;
 
     Pin laserDisable = { LAS_DISABLE_PIN, 14, PIN_CYFROWY, 0, "Laser disable", OUTPUT };
 
-    Pin wszystkiePiny[ILOSC_PINOW] =
-    {
+    Pin pinyLasera[ILOSC_PINOW] = {
         
         {GLOBAL_ENABLE_PIN, 10, PIN_CYFROWY, 0, "Global Enable", OUTPUT},
         {LASER_EMITION_GATE_PIN, 11, PIN_CYFROWY, 0, "Laser emission gate", OUTPUT},
@@ -89,18 +88,17 @@ void setup()
     
     };
 
-    /*obsluga wyswietlacza*/
-    extern uint8_t SmallFont[];
+    /*obsługa wyświetlacza*/
     extern uint8_t TinyFont[];
     extern uint8_t MediumNumbers[];
     LCD5110 wyswietlacz(SCK_PIN, MOSI_PIN, DC_PIN, RST_PIN, CS_PIN);
     /* tryb 0 - monitorowane prady, tryb 1 - temperatura podstawy, tryb 2 - ustawiane potencjometrami wartosci*/
     byte trybWyswietlacza = 0;
-    byte poprzedniTrybWyswietlacza = 0;
-    byte zmienonyEkranWyswietlacza = 0;
+    byte zmienionyEkranWyswietlacza = 0;
     byte pierwszeWykrycieNacisnieciaPrzycisku = 1;
     byte odczytaneWartosci[ILOSC_CYFR_ADC] = {0, 0 ,0, 0, 0, 0 };
-	/* ==== obsluga LEDow ==== */
+	
+	/* ==== obsługa LEDów ==== */
     /*ekspander pinow*/
     Adafruit_MCP23017 mcp;
     mcp.begin();
@@ -109,18 +107,22 @@ void setup()
     byte ledNrPin[ILOSC_LEDOW] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
 	
 
-	/* ======= ustawianie typow pinow (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
-    /* piny - ustawienie input/output i ustawienie startowych wartosci
-    wyjsc sterujacych na stan niski,
-    diod informujacych o stanach wejsc na stan odpowiadajacy stanom odczytanym z wejsc
+	/* ======= ustawianie typów pinów (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
+	
+	/* rozpoczęcie komunikacji szeregowej */
+	Serial.begin(9600);
+	
+    /* piny - ustawienie input/output i ustawienie startowych wartości
+    wyjść sterujących na stan niski,
+    diod informujących o stanach wejść na stan odpowiadający stanom odczytanym z wejść
     */
     for (size_t i = 0; i < ILOSC_PINOW; i++) {
-        if (wszystkiePiny[i].rodzajPinu == PIN_CYFROWY) {
-            pinMode(wszystkiePiny[i].rzeczywistyNrPinu, wszystkiePiny[i].inOut);
+        if (pinyLasera[i].rodzajPinu == PIN_CYFROWY) {
+            pinMode(pinyLasera[i].rzeczywistyNrPinu, wszystkiePiny[i].inOut);
         }
         /*ustaw wszystkie wyjscia na 0*/
-        if (wszystkiePiny[i].inOut == OUTPUT) {
-            digitalWrite(wszystkiePiny[i].rzeczywistyNrPinu, LOW);
+        if (pinyLasera[i].inOut == OUTPUT) {
+            digitalWrite(pinyLasera[i].rzeczywistyNrPinu, LOW);
         }
     }
 
@@ -133,7 +135,7 @@ void setup()
         }
     }
 
-    /* pin laser ready i LED sygnalizujacy*/ 
+    /* pin laser ready i LED sygnalizujący*/ 
     poprzedniStanLaserReady = zwrocStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu);
     /*odczytaj stan LASER_READY_PIN i odpowiednio ustaw diode sygnalizujaca LED_LASER_READY*/
     if (poprzedniStanLaserReady == HIGH) {
@@ -142,7 +144,7 @@ void setup()
         mcp.digitalWrite(LED_LASER_READY_PIN, LOW);
     }
 
-    /*piny bledow i LEDy sygnalizujace bledy*/
+    /*piny błędów i LEDy sygnalizujące błędy*/
     for (size_t i = 0; i < ILOSC_PINOW_BLEDOW; i++) {
         poprzedniStanPinowBledow[i] = zwrocStanPinuCyfrowego(pinyBledow, ILOSC_PINOW_BLEDOW, pinyBledow[i].rzeczywistyNrPinu);
         /* odczytaj wejscia pinow bledow i odpowiednio zasygnalizuj diodami*/
@@ -154,42 +156,38 @@ void setup()
         }
     }
 	
-	/* przycisk przelaczajacy wartosci wyswietlane na ekranie */
-    pinMode(PRZYCISK_PIN, INPUT_PULLUP);
+	/* przycisk przełączajacy wartości wyświetlane na ekranie */
+    pinMode(PRZYCISK_PIN, INPUT);
 
-    /*pin informujacy o wybranym zrodle zasilania
-    stan wysoki - jedno, przechodzace przez uklad
-    stan niski - dwa, bezposrednio z dwoch zrodel zewnetrznych
+    /*pin informujący o wybranym napięcia dla sterowania poziomami prądów w głównym wzmacniaczu
+    stan wysoki - jedno, przechodzące przez układ elektroniczny
+    stan niski - dwa, bezpośrednio z dwóch źródeł zewnętrznych
     */
-    pinMode(WYBOR_ZASILANIA_PIN, INPUT);
+    pinMode(WYBOR_ZRODLA_NAPIECIA_PIN, INPUT);
 
     /*przerwanie od przycisku - Pin Change Interrupt*/
     przerwaniePrzyciskUstawienie();
 
-    /* timer u�ywany do zniwelowania prze��czania styk�w */
+    /* timer używany do zniwelowania przełączania styków */
     przyciskTimerUstawienie();
     
-    /* timer - od�wie�anie ekranu*/
+    /* timer - odświeżanie ekranu*/
     czestOdswEkranuTimerUstawienie();
 
-    /* umo�liwienie obs�ugi przerwan*/
+    /* umożliwienie obsługi przerwań*/
     sei(); 
   
     /* wyswietl status poczatkowy */
     sSendLn("Status poczatkowy:");
-    wyswietlStanyWszystkichPinow(wszystkiePiny, ILOSC_PINOW);
+    wyswietlStanyWszystkichPinow(pinyLasera, ILOSC_PINOW);
     
     wyswietlacz.InitLCD(60);
-    wyswietlacz.setFont(SmallFont);
-    wyswietlacz.clrScr();
-
     wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
 
-    int counter = 0;
 
     while (1) {
 
-        /* ====== obsluga laser ready =======*/
+        /* ====== obsługa laser ready =======*/
         if (zwrocStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu) != poprzedniStanLaserReady) {
             poprzedniStanLaserReady = zwrocStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu);
             mcp.digitalWrite(LED_LASER_READY_PIN, poprzedniStanLaserReady);
@@ -215,8 +213,8 @@ void setup()
                 PRZERWANIE_TIMER2_OFF;
                 PRZERWANIE_TIMER1_OFF;
                 if (stanPrzycisku == PRZYCISK_WCIAZ_WCISNIETY) {
-                    przelaczTrybWyswietlacza(trybWyswietlacza, digitalRead(WYBOR_ZASILANIA_PIN));
-                    zmienonyEkranWyswietlacza = 0; 
+                    przelaczTrybWyswietlacza(trybWyswietlacza, digitalRead(WYBOR_ZRODLA_NAPIECIA_PIN));
+                    zmienionyEkranWyswietlacza = 0; 
                }
                 stanPrzycisku = NIE_SPRAWDZAJ_STANU_PRZYCISKU;
                 pierwszeWykrycieNacisnieciaPrzycisku = 1;
@@ -226,9 +224,9 @@ void setup()
         }
 
         /* ==== obsluga zmiany wyswietlanych danych ==== */
-        if (!zmienonyEkranWyswietlacza) {
+        if (!zmienionyEkranWyswietlacza) {
             wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
-            zmienonyEkranWyswietlacza = 1;
+            zmienionyEkranWyswietlacza = 1;
             PRZERWANIE_TIMER2_ON;
         }
 
@@ -258,7 +256,7 @@ void setup()
 
             sSendLn();
 
-            obsluzKomende(wszystkiePiny, ILOSC_PINOW, bufor, mcp);
+            obsluzKomende(pinyLasera, ILOSC_PINOW, bufor, mcp);
 
             buforPelny = 0;
 

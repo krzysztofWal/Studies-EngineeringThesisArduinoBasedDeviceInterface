@@ -37,7 +37,7 @@
 #define LED_LAS_EMIT_GATE_ENABLE_PIN 15//PB7
 
 /*wyswietlacz*/
-#define WYBOR_ZASILANIA_PIN 2
+#define WYBOR_ZASILANIA_PIN 59
 #define PRZYCISK_PIN 53
 #define PRZYCISK_PORT PINB
 #define PRZYCISK_REJ_POZYCJA PB0
@@ -63,14 +63,14 @@
 #define LAS_DISABLE_PIN 18
 #define MODE_SELECT_BIT 19
 
-#define STATE_SEL_0_PIN 23
-#define STATE_SEL_1_PIN 25
-#define STATE_SEL_2_PIN 27
-#define STATE_SEL_3_PIN 29
-#define STATE_SEL_4_PIN 31
-#define STATE_SEL_5_PIN 33
-#define STATE_SEL_6_PIN 35
-#define STATE_SEL_7_PIN 37
+#define STATE_SEL_0_PIN 30
+#define STATE_SEL_1_PIN 28
+#define STATE_SEL_2_PIN 26
+#define STATE_SEL_3_PIN 24
+#define STATE_SEL_4_PIN 22
+#define STATE_SEL_5_PIN 27
+#define STATE_SEL_6_PIN 25
+#define STATE_SEL_7_PIN 23
 
 /*piny monitorujace*/
 #define BASE_PLATE_TEMP_MON_PIN 54
@@ -106,7 +106,6 @@ patrz: funkcja obslugaLedowBledow()*/
 
 /* obsluga komend */
 #define WIELKOSC_BUFORA_SERIAL 6
-#define WYLACZ_D 5
 #define ODCZYTAJ_WSZYSTKIE 3
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
@@ -119,13 +118,12 @@ patrz: funkcja obslugaLedowBledow()*/
 #define sSendLine Serial.println("====================================")
 
 typedef struct {
-   //char przypisanyOpisPinu[3];
-    byte rzeczywistyNrPinu;
-    byte numerWyboru;
-    byte rodzajPinu;
-    byte stanPinu;
-    char opisPinu[DLUGOSC_OPISU_PINOW];
-    byte inOut;
+    byte rzeczywistyNrPinu; //fizyczny nr pinu Atmegi2560
+    byte numerWyboru; //nr widoczny przez użytkownika, piny 'posegregowane' są kategoriami
+    byte rodzajPinu; // ANALOG/DIGITAL
+    byte stanPinu; //używany przy pinach cyfrowych - HIGH/LOW
+    char opisPinu[DLUGOSC_OPISU_PINOW]; //opis wyświetlany użytkownikowi w terminalu
+    byte inOut; // INPUT/OUTPUT
 } Pin;
 
 typedef struct {

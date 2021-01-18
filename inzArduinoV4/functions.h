@@ -22,7 +22,7 @@
 void przyciskTimerUstawienie()
 Opis :
     Ustawia rejestry 16-to bitowego TIMER1 : TCCR1A, TCCR1B, OCR1A
-    Wyb�r preskalera oraz warto�ci por�wnawczej
+    Wyb�r preskalera oraz wartości por�wnawczej
     Timer uzywany jest do usuwania drgan mechanicznych stykow przycisku
 Argumenty :
     -
@@ -123,22 +123,22 @@ byte obsluzPrzycisk(byte& pierwszeWykrycieNacisnieciaPrzycisku);
 
 /*==== obsluga komend ====*/
 
-void obsluzKomende(Pin* wszystkiePiny, byte iloscPinow, char* bufor, Adafruit_MCP23017& mcp);
+void obsluzKomende(Pin* pinyLasera, byte iloscPinow, char* bufor, Adafruit_MCP23017& mcp);
 
 /*  byte sprawdzNumerPinu()
 Opis :
     Sprawdza czy dana liczba jest numerem "opisowym" jednego z pinow zapisanych w tablicyPinow i je�li tak, to zwraca typ tego pinu
 Argumenty:
     byte liczba - potencjalny "opsiowy" numer pinu
-    Pin wszystkiePiny[] - wska�nik do tablicy zawieraj�cej sprawdzane piny
-    size_t - ilo�� element�w w tablicy wszystkiePiny
+    Pin pinyLasera[] - wska�nik do tablicy zawieraj�cej sprawdzane piny
+    size_t - ilo�� element�w w tablicy pinyLasera
 Funkcja zwraca:
     (bute) warto�� z tych okre�lone makrami:
     PIN_ANALOGOWY, PIN_CYFROWY_WYJSCIE, PIN_CYFROWY_WEJSCIE albo PIN_NIE_ISTNIEJE
 Uzywane funkcje:
     -
 */
-byte sprawdzNumerPinu(byte liczba, Pin wszystkiePiny[], size_t iloscPinow);
+byte sprawdzNumerPinu(byte liczba, Pin pinyLasera[], size_t iloscPinow);
 
 /* byte sprawdzPolecenie()
  Opis:
@@ -153,7 +153,7 @@ Argumenty :
     PolecenieInfo* struktAdr - wsk�nik na instancj� struktury gdzie maja byc zapisane dane
     char polecenie[] - wska�nik na pierwszy element tablicy z poleceniem
     size_t dlugosc - dlugosc tablicy z poleceniem
-    Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy z danymi pin�w
+    Pin pinyLasera[] - wska�nik na pierwszy element tablicy z danymi pin�w
     size_t iloscPinow - d�ugo�� tablicy z danymi pinow (inaczej ilosc pinow)
 Funkcja zwraca :
     1 - je�li polecenie by�o nieprawid�owe
@@ -170,12 +170,12 @@ Uwagi:
     W przypadku zmiany stanu wyj�cia cyfrowego, po��dany stan (1 lub 0) jesgt wpisywany w pole struktury nowyStan
 
 */
-byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin wszystkiePiny[], size_t iloscPinow);
+byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, Pin pinyLasera[], size_t iloscPinow);
 
 /* Pin* zmienStanPinu()
-    Zmienia stan na wybranym wyj�ciu cyfrowym (nie dokonuje aktualizacji jego stanu w tablicy wszystkiePiny). Zak�ada, �e zosta�o sprawdzone, czy pin taki istnieje i jest wyj�ciem cyfrowym.
+    Zmienia stan na wybranym wyj�ciu cyfrowym (nie dokonuje aktualizacji jego stanu w tablicy pinyLasera). Zak�ada, �e zosta�o sprawdzone, czy pin taki istnieje i jest wyj�ciem cyfrowym.
     Argumenty:
-        Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy, w kt�ej znajduje si� pin, kt�rego stan ma ulec zmianie
+        Pin pinyLasera[] - wska�nik na pierwszy element tablicy, w kt�ej znajduje si� pin, kt�rego stan ma ulec zmianie
         size_t iloscPinow - rozmiar powy�szej 
         byte nrPinu - nr pinu, na kt�rym ma by� zmieniony stan
         byte nowyStan - po��dany stan na okre�lonym wyj�ciu
@@ -184,31 +184,31 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
     U�ywane funkcje:
         digitalWrite() - funkcja Arduino
 */
-Pin* zmienStanPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu, byte nowyStan);
+Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu, byte nowyStan);
 
-byte zwrocRzeczywistyNumerPinu(Pin wszystkiePiny[], size_t iloscPinow, byte numerWyboru);
+byte zwrocRzeczywistyNumerPinu(Pin pinyLasera[], size_t iloscPinow, byte numerWyboru);
 
-byte zwrocNumerWyboru(Pin wszystkiePiny[], size_t iloscPinow, byte rzeczywistyNrPinu);
+byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu);
 
 /*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
 /*void aktualizujTabeleStanow()
 Opis:
-    Zmienia warto�� stanu pinu zapisanego w tablicy wszystkiePiny (tj. zmienia warto�� zapisan� w tablicy, a nie t� "rzeczywist�" - patrz: funkcja zmienStanPinu()); zak�ada, �e pin taki istnieje i jest cyfrowym wyj�ciem
+    Zmienia warto�� stanu pinu zapisanego w tablicy pinyLasera (tj. zmienia warto�� zapisan� w tablicy, a nie t� "rzeczywist�" - patrz: funkcja zmienStanPinu()); zak�ada, �e pin taki istnieje i jest cyfrowym wyj�ciem
 Argumenty:
-    Pin* wszystkiePiny - wska�nik na pin (element w tablicy), kt�rego zapisany w niej stan ma by� zmieniony
+    Pin* pinyLasera - wska�nik na pin (element w tablicy), kt�rego zapisany w niej stan ma by� zmieniony
 Funkcja zwraca:
     -
 U�ywane funkcje:
     -
 */
-void aktualizujStanPinu(Pin* wszystkiePiny, byte nowyStan);
+void aktualizujStanPinu(Pin* pinyLasera, byte nowyStan);
 
 /* ===== odcztywanie stanow pinow ==== */
 /* byte zwrocStanPinuCyfrowego()
  Opis:
-    Zwraca stan logiczny pinu odczytany funkcj� digitalRead() - w przypadku wej�cia - lub z tablicy wszystkiePiny - w przypadku wyj�cia; zak�ada, �e pin jest cyfrowy i znajduje si� w  tablicy
+    Zwraca stan logiczny pinu odczytany funkcj� digitalRead() - w przypadku wej�cia - lub z tablicy pinyLasera - w przypadku wyj�cia; zak�ada, �e pin jest cyfrowy i znajduje si� w  tablicy
  Argumenty:
-        Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy pin�w
+        Pin pinyLasera[] - wska�nik na pierwszy element tablicy pin�w
         size_t iloscPinow - rozmiar powy�szej
         byte nrPinu - nr pinu kt�rego stan logiczny ma zwr�ci�
 Funkcja zwraca:
@@ -217,13 +217,13 @@ U�ywane funkcje:
     (w zale�no�ci od tego, czy pin jest wej�ciem czy wyj�ciem)
     digtalRead() - funkcja Arduino 
 */
-byte zwrocStanPinuCyfrowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
+byte zwrocStanPinuCyfrowego(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
 
 /* byte zwrocWartoscPinuAnalogowego()
  Opis:
       zwraca warto�� odczytan� funkcj� analogRead() jako procent z 0-5V (uzywa funkcji map()); zak�ada, �e pin znajduje si� w tablicy
  Argumenty:
-        Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy pin�w, w kt�rej znajduje si�
+        Pin pinyLasera[] - wska�nik na pierwszy element tablicy pin�w, w kt�rej znajduje si�
         size_t iloscPinow - ilo�� element�w w tablicy
         nrPinu - nr pinu kt�rego warto�� ma by� odczytana
 Funkcja zwraca:
@@ -233,7 +233,7 @@ U�ywane funkcje:
     analogRead(),
     map()
 */
-byte zwrocWartPinuAnalogowego(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
+byte zwrocWartPinuAnalogowego(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
 
 /* void odczytajWartosciPinowAnalogowych
 Opis:
@@ -257,7 +257,7 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci);
  Opis:
     Wysy�a po��czeniem szeregowym stany wszystkich pin�w zawartych w tablicy wszytkiePiny. Do odczytania tych stan�w u�ywa funkcji zwrocWartoscPinuAnalogowego() oraz zwrocWartoscPinuCyfrowego(). Zak�ada, �e komunnikacja szeregowa zosta�a zainicjowana
 Argumenty
-    Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy z zawaratymi informacjami o pinach
+    Pin pinyLasera[] - wska�nik na pierwszy element tablicy z zawaratymi informacjami o pinach
     size_t iloscPinow - rozmiar tej tablicy
 Funkcja zwraca:
     -
@@ -266,13 +266,13 @@ U�ywane funkcje:
     byte zwrocStanPinuCyfrowego(),
     print(), println() - metody klasy Serial (Arduino)
 */
-void wyswietlStanyWszystkichPinow(Pin wszystkiePiny[], size_t iloscPinow);
+void wyswietlStanyWszystkichPinow(Pin pinyLasera[], size_t iloscPinow);
 
 /* void wyswietlOpisPinu() 
 Opis:
     Wysy�a po��czeniem szeregowym opis wybranego pinu zawarty w tablicy wszytkiePiny. . Zak�ada, �e komunnikacja szeregowa zosta�a zainicjowana oraz, �e pin znajduje si� w tej tablicy
 Argumenty:
-    Pin wszystkiePiny[] - wska�nik na pierwszy element tablicy z zawartym opisem pinu
+    Pin pinyLasera[] - wska�nik na pierwszy element tablicy z zawartym opisem pinu
     size_t iloscPinow - ilo�� element�w w tablicy
     byte nrPinu - numer pinu, kt�rego opis ma by� przes�any
 Funkcja zwraca:
@@ -280,7 +280,7 @@ Funkcja zwraca:
 U�ywane funkcje:
     print() - metoda klasy Serial (Arduino)
 */
-void wyswietlOpisPinu(Pin wszystkiePiny[], size_t iloscPinow, byte nrPinu);
+void wyswietlOpisPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
 
 /* ==== ledy bledow ==== */
 /*void obslugaLedowBledow
