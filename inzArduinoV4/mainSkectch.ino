@@ -26,15 +26,13 @@ ISR(PCINT0_vect) {
 
 
 void setup()
-{
+{	
+	/* ======== deklaracje i definicje zmiennych ======== */ 
     /*komunikacja z komputerem*/
     Serial.begin(9600);
     char bufor[WIELKOSC_BUFORA_SERIAL];
     bool buforPelny = false;
     byte index = 0;
-
-    //char polecenie[WIELKOSC_BUFORA_SERIAL];
-    //PolecenieInfo sprawdzonePolecenie;
 
     Pin pinyBledow[ILOSC_PINOW_BLEDOW] = {
         {POW_SUP_FAULT_PIN, 30, PIN_CYFROWY, 0, "Power supply fault [when 0]", INPUT},
@@ -91,7 +89,7 @@ void setup()
     
     };
 
-    /*obs�uga wy�wietlacza*/
+    /*obsluga wyswietlacza*/
     extern uint8_t SmallFont[];
     extern uint8_t TinyFont[];
     extern uint8_t MediumNumbers[];
@@ -102,14 +100,16 @@ void setup()
     byte zmienonyEkranWyswietlacza = 0;
     byte pierwszeWykrycieNacisnieciaPrzycisku = 1;
     byte odczytaneWartosci[ILOSC_CYFR_ADC] = {0, 0 ,0, 0, 0, 0 };
-
+	/* ==== obsluga LEDow ==== */
     /*ekspander pinow*/
     Adafruit_MCP23017 mcp;
     mcp.begin();
-
+	
     /*pierwsze siedem LEDow odpowiada kolejnym pinom w tablicy pinyBledow*/
     byte ledNrPin[ILOSC_LEDOW] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_DISABLE_PIN, LED_LASER_READY_PIN, LED_LAS_EMIT_GATE_ENABLE_PIN };
+	
 
+	/* ======= ustawianie typow pinow (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
     /* piny - ustawienie input/output i ustawienie startowych wartosci
     wyjsc sterujacych na stan niski,
     diod informujacych o stanach wejsc na stan odpowiadajacy stanom odczytanym z wejsc
@@ -124,6 +124,7 @@ void setup()
         }
     }
 
+	/* piny ekspandera (LEDy)*/
     for (size_t i = 0; i < ILOSC_LEDOW; i++) {
         mcp.pinMode(ledNrPin[i], OUTPUT);
         /*ustaw stan niski na LEDach sygnalizujace LED_LASER_DISABLE i LED_LAS_EMIT_GATE */
@@ -152,8 +153,8 @@ void setup()
             mcp.digitalWrite(ledNrPin[i], LOW);
         }
     }
-
-    /* przycisk prze��czaj�cy wartosci wyswietlane na ekranie */
+	
+	/* przycisk przelaczajacy wartosci wyswietlane na ekranie */
     pinMode(PRZYCISK_PIN, INPUT_PULLUP);
 
     /*pin informujacy o wybranym zrodle zasilania
