@@ -32,7 +32,6 @@ void setup()
     char bufor[WIELKOSC_BUFORA_SERIAL];
     bool buforPelny = false;
     byte index = 0;
-
 	/* obsluga pinow (wejsc i wyjsc z lasera)*/
     Pin pinyBledow[ILOSC_PINOW_BLEDOW] = {
         {POW_SUP_FAULT_PIN, 30, PIN_CYFROWY, 0, "Power supply fault [when LOW]", INPUT},

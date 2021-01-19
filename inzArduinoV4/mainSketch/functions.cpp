@@ -2,13 +2,12 @@
 
 /* ==== poczatkowe ustawienia peryferiow ==== */
 void przyciskTimerUstawienie() {
-    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawia�
-    TCCR1B |= 3u; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wyb�r preskalera /64
+    TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiać
+    TCCR1B |= 3u; TCCR1B &= ~(4u); // ustawienie 011 na bitach 2:0 - wybór preskalera /64
     OCR1A = 62500; //wartośc porównawcza (do 65 535)
     /*
     preskaler 64
     1 cykl licznika -> 64/16MHz = 4000ns
-    4000ns x 16383 ~= 0,066 s
     */
 }
 
@@ -244,7 +243,7 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
                     polecenie[tempIndeks + 2] == 0) {
                 struktAdr->rodzajPolecenia = ZMIEN_STAN_CYFROWEG0;
                 struktAdr->nowyStan = polecenie[tempIndeks + 1] - 48;
-                struktAdr->nrPinu = struktAdr->nrPinu = zwrocRzeczywistyNumerPinu(stanyPinowCyfrowych, iloscPinow, tempPinNr);
+                 struktAdr->nrPinu = zwrocRzeczywistyNumerPinu(stanyPinowCyfrowych, iloscPinow, tempPinNr);
                 return 1;
             } else {
                 return 0;
@@ -301,6 +300,7 @@ byte zwrocRzeczywistyNumerPinu(Pin pinyLasera[], size_t iloscPinow, byte numerWy
             return pinyLasera[i].rzeczywistyNrPinu;
         }
     }
+	return 255;
 }
 
 byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu) {
@@ -309,6 +309,7 @@ byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPin
             return pinyLasera[i].numerWyboru;
         }
     }
+	return 255;
 }
 
 /*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
