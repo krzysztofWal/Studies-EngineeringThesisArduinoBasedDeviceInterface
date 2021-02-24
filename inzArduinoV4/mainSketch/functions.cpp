@@ -98,10 +98,16 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23
     char polecenie[WIELKOSC_BUFORA_SERIAL];
     PolecenieInfo sprawdzonePolecenie;
 
+    /*
+     * 
+     */
     for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
         polecenie[i] = 0;
     }
 
+    /*
+     *  Czy znakow hest pe
+     */
     while (i < WIELKOSC_BUFORA_SERIAL) {
         if (bufor[i] != 13) {
             polecenie[i] = bufor[i];
@@ -111,7 +117,11 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23
             i = 6;
         }
     }
-  
+
+    /*
+     *  czy polecenie to sama litera 'd', jesli tak, wysoki stan na 'LASER DISABLE', takie - "szybsze traktowanie", bez przechodzenia przez nastepne warunki
+     */
+     
     if(polecenie[0] == 'd') {
         byte temp = 0;
         for (size_t i = 1; i < WIELKOSC_BUFORA_SERIAL; i++) {
@@ -123,9 +133,10 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23
            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
            mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
         }
+        
     } else {
   
-        /* wpisana komenda jest prawidlowa */
+        /* wpisana komenda jest prawidlowa (ale nie jest 'd' )*/
         if (sprawdzKomende(&sprawdzonePolecenie, polecenie, WIELKOSC_BUFORA_SERIAL, pinyLasera, iloscPinow)) {
     
             if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {

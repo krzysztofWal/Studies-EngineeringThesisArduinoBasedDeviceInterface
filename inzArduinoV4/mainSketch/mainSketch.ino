@@ -32,6 +32,7 @@ void setup()
     char bufor[WIELKOSC_BUFORA_SERIAL];
     bool buforPelny = false;
     byte index = 0;
+    
 	/* obsluga pinow (wejsc i wyjsc z lasera)*/
     Pin pinyBledow[ILOSC_PINOW_BLEDOW] = {
         {POW_SUP_FAULT_PIN, 30, PIN_CYFROWY, 0, "Power supply fault [when LOW]", INPUT},
@@ -237,6 +238,13 @@ void setup()
         }
 
         /* ==== odbieranie komend od uzytkownika ==== */
+
+        /*    
+         *     Jesli jest znak do odbioru w serialu dopisz go do tablicy bufor na pozycji indeks i uaktualnij indeks
+         *     Nastepie sprawdz czy bufor pelny lub czy wpisany znak to CR lub LF, jesli ktorykolwiek z tych spelniony
+         *     ustaw flage buforPelny na 1
+         */
+         
         if (Serial.available() > 0) {
             bufor[index] = Serial.read();
             sSend(bufor[index]);
@@ -248,6 +256,12 @@ void setup()
         }
         
         /* ==== obsluga wpisanej komendy ==== */
+
+        /*
+         * 
+         *    Jesli bufor jest pelny to obsluz komende wpisana w buforze
+         *    Wyzeruj flagę bufor pelny
+         */
         if (buforPelny) {
             PRZERWANIE_PRZYCISK_OFF;
             PRZERWANIE_TIMER1_OFF;
