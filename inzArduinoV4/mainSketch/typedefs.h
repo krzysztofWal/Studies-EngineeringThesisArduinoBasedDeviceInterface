@@ -92,6 +92,7 @@
 #define ILOSC_PINOW 26
 /*ILOSC_PINOW_BLEDOW musi byc mniejsza lub rowna ILOSC_LEDOW
 patrz: funkcja obslugaLedowBledow()*/
+#define ILOSC_PINOW_CHARAKT 8
 #define ILOSC_PINOW_BLEDOW 7
 #define ILOSC_LEDOW 10 
 #define DLUGOSC_OPISU_PINOW 31
@@ -111,7 +112,7 @@ patrz: funkcja obslugaLedowBledow()*/
 #define ODCZYTAJ_ANALOGOWY 2
 #define ODCZYTAJ_CYFROWY 1
 #define ZMIEN_STAN_CYFROWEG0 0
-
+#define MAKSMALNY_MOZLIWY_NUMER_CHARAKT 30
 
 /* skroty metod klasy Serial */
 #define sSend Serial.print

@@ -186,14 +186,14 @@ Opis:
  Argumenty:
     Pin pinyLasera[] - wskaźnik na pierwszy element tablicy, w której znajduje się pin, którego stan ma ulec zmianie
     size_t iloscPinow - rozmiar powyższej 
-    byte nrPinu - "rzeczywisty" nr pinu, na którym ma być zmieniony stan
+    byte rzeczywistyNrPinu - "rzeczywisty" nr pinu, na którym ma być zmieniony stan
     byte nowyStan - pożądany stan na określonym wyjściu
  Funkcja zwraca:
     (Pin *) wskaźnik na element tablicy z pinami, którego stan został zmieniony
 Używane funkcje:
     digitalWrite() - funkcja Arduino
 */
-Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu, byte nowyStan);
+Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu, byte nowyStan);
 
 /*byte zwrocRzeczywistyNumerPinu()
 Opis:

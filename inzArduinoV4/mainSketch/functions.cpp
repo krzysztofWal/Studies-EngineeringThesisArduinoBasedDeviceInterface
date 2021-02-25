@@ -92,22 +92,16 @@ void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz
 
 
 /*==== obsluga komend ====*/
-void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23017& mcp) {
+void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, byte iloscPinowCharakterystyk, char *bufor, Adafruit_MCP23017& mcp) {
 
     size_t i = 0;
     char polecenie[WIELKOSC_BUFORA_SERIAL];
     PolecenieInfo sprawdzonePolecenie;
 
-    /*
-     * 
-     */
     for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
         polecenie[i] = 0;
     }
 
-    /*
-     *  Czy znakow hest pe
-     */
     while (i < WIELKOSC_BUFORA_SERIAL) {
         if (bufor[i] != 13) {
             polecenie[i] = bufor[i];
@@ -133,6 +127,12 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23
            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
            mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
         }
+    } else if(polecenie[0] == 'b') {
+
+        byte nr = konwersjaCharInt(bufor, WIELKOSC_BUFORA_SERIAL);
+        if (nr > 0) {
+            ustawChar(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
+        }
         
     } else {
   
@@ -144,7 +144,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, char *bufor, Adafruit_MCP23
                 aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
     
                 /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
-    
+   
                 if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN) {
                     mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
                   
@@ -296,7 +296,7 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
 
 }
 
-Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu, byte nowyStan) {
+Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu, byte nowyStan) {
     for (size_t i = 0; i < iloscPinow; i++) {
         if (nrPinu == (pinyLasera + i)->rzeczywistyNrPinu) {
             digitalWrite(nrPinu, nowyStan);
@@ -323,6 +323,54 @@ byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPin
 	return 255;
 }
 
+/*
+ *  to co dostajemy to tablica maksymalnie piec znakow
+ *  zwraca 1 jesli niechciane wejscie
+ *  przekazujemy b + jakis numer czyli numer zaczynamy od pierwszego ineksu
+ *  jesli o nie bedzie numer to funkcja zwroci blad wiec nie trzeba sprawdzac przy wywolaniu
+ *  8 pinow a wiec 255 mozliwosci
+ */
+int konwersjaCharInt(char *bufor, byte rozmiarBufora) { // returns -1 if invalid input
+    int32_t result = 0;
+  //  int32_t tWP;
+  //  int32_t number;
+  // theoretically od tylu bylo by ciut wydajniej bo bez tego odejmowania za kazdym razem ale to tam szczegoly
+    for (byte i = 1; i < rozmiarBufora ; i++) {
+          if (bufor[i] < 58 && bufor[i] > 47) {
+              //  number = arr[i] - 48;
+              //  tWP = size - i - 1;
+              result += (bufor[i] - 48) * (int32_t)pow(10,rozmiarBufora - i - 1);
+          } else {
+              result = -1;
+              break;
+          }
+    }
+    if (result > MAKSMALNY_MOZLIWY_NUMER_CHARAKT) {result = -1;}
+    return result;
+}
+/*
+ * zakladamy ze numer miesci sie w osmiu bitach ofkors
+ * iteracja po numerach w tablicy pinyCharakterystyk, ale uaktualniana jest tablica pinyLasera
+ */
+void ustawCharakt(int number, Pin pinyCharakterystyk[], byte iloscPinowCharakt, Pin pinyLasera[], byte iloscPinowLasera) {  
+    for (uint8_t i = 0; i < iloscPinowCharakt; i++)
+        if ((int)(number & (1u << i))) {
+        /* na wyjsciu 1 */
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i]->rzeczywistyNrPinu, HIGH), HIGH);
+        } else {
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i]->rzeczywistyNrPinu, LOW), LOW);
+        }
+}
+
+/*
+Pin* wskaznikNaPin(Pin* tablicaPinow, byte iloscPinow, byte rzeczywistyNrPinu) {
+   for (size_t i = 0; i < iloscPinow; i++) {
+      if (tablicaPinow[i].rzeczywistyNrPinu == rzeczywistyNrPinu) {
+          return &tablicaPinow[i];
+      }
+   }
+}
+*/
 /*==== obsluga tablicy pinow (stany pinow cyfrowych) ====*/
 void aktualizujStanPinu(Pin* pinyLasera, byte nowyStan) {
     pinyLasera->stanPinu = nowyStan;

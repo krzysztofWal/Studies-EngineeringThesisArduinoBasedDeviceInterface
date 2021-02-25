@@ -46,12 +46,26 @@ void setup()
 
     byte poprzedniStanPinowBledow[ILOSC_PINOW_BLEDOW];
 
+ /* jesli STATE_SEL_N_PIN nie beda po kolei, wystapi problem z funkcja ustawCharakt()*/
+    Pin pinyCharakterystyk[8] = {
+        {STATE_SEL_0_PIN,  20, PIN_CYFROWY,0, "State select: 0", OUTPUT},
+        {STATE_SEL_1_PIN,  21, PIN_CYFROWY,0, "State select: 1", OUTPUT},
+        {STATE_SEL_2_PIN,  22, PIN_CYFROWY,0, "State select: 2", OUTPUT},
+        {STATE_SEL_3_PIN,  23, PIN_CYFROWY,0, "State select: 3", OUTPUT},
+        {STATE_SEL_4_PIN,  24, PIN_CYFROWY,0, "State select: 4", OUTPUT},
+        {STATE_SEL_5_PIN,  25,PIN_CYFROWY, 0, "State select: 5", OUTPUT},
+        {STATE_SEL_6_PIN,  26, PIN_CYFROWY,0, "State select: 6", OUTPUT},
+        {STATE_SEL_7_PIN,  27,PIN_CYFROWY, 0, "State select: 7", OUTPUT},
+    }
+    
+
     Pin laserReady = { LASER_READY_PIN, 15, PIN_CYFROWY, 0, "Laser ready [when HIGH]", INPUT };
 
     byte poprzedniStanLaserReady;
 
     Pin laserDisable = { LAS_DISABLE_PIN, 14, PIN_CYFROWY, 0, "Laser disable", OUTPUT };
 
+    /* wartosci w tej tablicy sa uaktualniane */
     Pin pinyLasera[ILOSC_PINOW] = {
         
         {GLOBAL_ENABLE_PIN, 10, PIN_CYFROWY, 0, "Global Enable", OUTPUT},
@@ -62,14 +76,14 @@ void setup()
         laserDisable, 
         laserReady,
 
-        {STATE_SEL_0_PIN,  20, PIN_CYFROWY,0, "State select: 0", OUTPUT},
-        {STATE_SEL_1_PIN,  21, PIN_CYFROWY,0, "State select: 1", OUTPUT},
-        {STATE_SEL_2_PIN,  22, PIN_CYFROWY,0, "State select: 2", OUTPUT},
-        {STATE_SEL_3_PIN,  23, PIN_CYFROWY,0, "State select: 3", OUTPUT},
-        {STATE_SEL_4_PIN,  24, PIN_CYFROWY,0, "State select: 4", OUTPUT},
-        {STATE_SEL_5_PIN,  25,PIN_CYFROWY, 0, "State select: 5", OUTPUT},
-        {STATE_SEL_6_PIN,  26, PIN_CYFROWY,0, "State select: 6", OUTPUT},
-        {STATE_SEL_7_PIN,  27,PIN_CYFROWY, 0, "State select: 7", OUTPUT},
+        pinyCharakterystyk[0],
+        pinyCharakterystyk[1],
+        pinyCharakterystyk[2],
+        pinyCharakterystyk[3],
+        pinyCharakterystyk[4],
+        pinyCharakterystyk[5],
+        pinyCharakterystyk[6],
+        pinyCharakterystyk[7],
 
         pinyBledow[0],
         pinyBledow[1],
