@@ -111,7 +111,7 @@ Uzywane funkcje:
 */
 void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font);
 
-/*==== obsługa komend ====*/
+/*==== obsługa komend i funkcje pomocnicze====*/
 /* void obsluzKomende()
 Opis:
 	Sprawdza, czy komenda przechowywana w tablicy bufor jest prawdiłową komendą. Na początku sprawdza czy jest komendą "d", jeśli tak to ustawia w stan wysoki wyjście LASER_DISABLE_PIN i sygnalizuje to odpowiednią diodą. Jeśli nie, to sprawdza czy komenda jest prawidłową komendą za pomocą funkcji sprawdzKomende().
@@ -201,7 +201,7 @@ Opis:
 	Jeśli taki pin nie istnieje zwraca 255.
 Argumenty:
 	Pin pinyLasera[] - wskaźnik na pierwszy element tablicy, w której znajduje się pin
-	size_t iloscPinow - rozmiar powyższej
+	size_t iloscPinow - rozmiar powyższejm albo nr indeksu znaku następującego po ostatnim, jaki chcemy brać pod uwagę
 	byte numerWyboru - "opisowy" nr pinu
 Funkcja zwraca:
 	(byte) - "rzeczywisty" nr pinu
@@ -224,6 +224,24 @@ Używane funkcje:
 	-
 */
 byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu);
+
+/*int konwersjaCharToInt()
+Opis: konwertuje znaki w przekazanym buforze (argument - wskaźnik do bufora) na integer
+zwraca wartość liczby, kiedy znajduje się ona w zakresie [0 , maksNumber)
+!- rozpatruje znaki od PIERWSZEGO indeksu, pomija zerowy -!
+
+Argumenty:
+	char *bufor - wskaźnik na zerowy wyraz bufora,
+	byte rozmiarBufora
+	byte maksNumber - maksymalna wartość liczbyw buforze która jest dopuszczalna (przy przekroczeniu funkcja zwraca -1)
+Fukcja zwraca
+	(int) liczbę zapisaną w buforze
+*/
+int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer);
+
+/*void ustawCharakter()
+*/
+void ustawCharakt(int number, Pin pinyCharakterystyk[], byte iloscPinowCharakt, Pin pinyLasera[], byte iloscPinowLasera)
 
 /*==== obsluga tablicy pinow (przechowującej stany pinów cyfrowych) ====*/
 /*void aktualizujTabeleStanow()
