@@ -129,9 +129,16 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         }
     } else if(polecenie[0] == 'b') {
 
+        /*
+         * funkcja konwersja sprawdza, czy wielkosc jest w odpowiednim zakresie
+         */
+
         byte nr = konwersjaCharInt(bufor, WIELKOSC_BUFORA_SERIAL);
+        
         if (nr > 0) {
             ustawChar(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
+        } else {
+            sSendLn("Nieprawidlowa komenda");
         }
         
     } else {
