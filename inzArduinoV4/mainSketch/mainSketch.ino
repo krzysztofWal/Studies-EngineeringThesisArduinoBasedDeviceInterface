@@ -46,7 +46,9 @@ void setup()
 
     byte poprzedniStanPinowBledow[ILOSC_PINOW_BLEDOW];
 
- /* jesli STATE_SEL_N_PIN nie beda po kolei, wystapi problem z funkcja ustawCharakt()*/
+ /* jesli STATE_SEL_N_PIN nie beda po kolei, wystapi problem z funkcja ustawCharakt()
+	!!!!-- stany pinow w tej tablicy nie są aktualizowane --!!!!
+ */
     Pin pinyCharakterystyk[8] = {
         {STATE_SEL_0_PIN,  20, PIN_CYFROWY,0, "State select: 0", OUTPUT},
         {STATE_SEL_1_PIN,  21, PIN_CYFROWY,0, "State select: 1", OUTPUT},

@@ -236,10 +236,25 @@ Argumenty:
 	byte maksNumber - maksymalna wartość liczbyw buforze która jest dopuszczalna (przy przekroczeniu funkcja zwraca -1)
 Fukcja zwraca
 	(int) liczbę zapisaną w buforze
+Używane funkcje:
+	-
 */
 int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer);
 
 /*void ustawCharakter()
+Opis: Ustawia stany pinow zawartych w tablicy pinyCharakterystyk przekazywanej do funkcji jako wskaźnik, rowniez aktualizując ich stany w tablicy pinyLaser[],
+!- Zakłada odpowiednie ułożenie pinów w tablicy pinyCharakterystyk, tak aby liczba była odpowiednio "przetłumaczona" na binarną na wyjściach -!
+Argumenty: 
+	int number - numer jaki ma zostać ustawiony "binarnie"na pinach
+	Pin pinyCharakterystyk - wskaźnik do pierweszego (właściwie zerowego) elementu tablicy z pinami, które ulegną zmianie
+	byte iloscPinowCharakt - rozmiar powyższej
+	Pin pinyLasera - wskaźnik do tablicy z wszystkimi  pinami
+	byte iloscPinowLasera - rozmiar powyższej
+Funkcja zwraca:
+	-
+Używane funkcje:
+	aktualizujStanPinu(),
+	zmienStanPinu()
 */
 void ustawCharakt(int number, Pin pinyCharakterystyk[], byte iloscPinowCharakt, Pin pinyLasera[], byte iloscPinowLasera)
 
