@@ -94,10 +94,12 @@ void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz
 /*==== obsluga komend ====*/
 void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, byte iloscPinowCharakterystyk, char *bufor, Adafruit_MCP23017& mcp) {
 
-    size_t i = 0;
+    size_t i = 0; // w tej zmiennej ilosc znakow b polecenie bufor, ktora nie jest 13
     char polecenie[WIELKOSC_BUFORA_SERIAL];
     PolecenieInfo sprawdzonePolecenie;
-
+	
+	byte iloscZnakowPolecenie = 0;
+	
     for (size_t i = 0; i < WIELKOSC_BUFORA_SERIAL; i++) {
         polecenie[i] = 0;
     }
@@ -108,10 +110,11 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
             i++;
         }
         else {
-            i = 6;
+			break;
+            //i = 6;
         }
     }
-
+	
     /*
      *  czy polecenie to sama litera 'd', jesli tak, wysoki stan na 'LASER DISABLE', takie - "szybsze traktowanie", bez przechodzenia przez nastepne warunki
      */
@@ -127,13 +130,20 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
            mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
         }
+	
+	/*
+	* czy polecenie zaczyna się od litery 'b' - to oznacza, że użytkownik chce zmieniać stany StateSelect pinów, cyli zmieniać wybór charakterystyki,
+	* po b wtedy pojawia się numer charakterystykiw postaci dziesiętnej
+	*/	
+	
     } else if(polecenie[0] == 'b') {
 
         /*
-         * funkcja konwersja sprawdza, czy wielkosc jest w odpowiednim zakresie
+         * funkcja konwersja sprawdza, czy wielkosc jest w odpowiednim zakresie,
+		 * zwraca -1 jesli nie jest w odpowiednim zakresie lub nie jest 
          */
 
-        byte nr = konwersjaCharInt(bufor, WIELKOSC_BUFORA_SERIAL);
+        byte nr = konwersjaCharInt(bufor, i, MAKSMALNY_MOZLIWY_NUMER_CHARAKT); /* do i-tego wyrazu (bez niego), i-1 to ostatni wyraz  zapełniony w tablicy polecenie*/
         
         if (nr > 0) {
             ustawChar(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
@@ -143,7 +153,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         
     } else {
   
-        /* wpisana komenda jest prawidlowa (ale nie jest 'd' )*/
+        /* wpisana komenda jest prawidlowa (ale nie jest 'd' ani 'b' )*/
         if (sprawdzKomende(&sprawdzonePolecenie, polecenie, WIELKOSC_BUFORA_SERIAL, pinyLasera, iloscPinow)) {
     
             if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
@@ -332,12 +342,12 @@ byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPin
 
 /*
  *  to co dostajemy to tablica maksymalnie piec znakow
- *  zwraca 1 jesli niechciane wejscie
+ *  zwraca -1 jesli niechciane wejscie
  *  przekazujemy b + jakis numer czyli numer zaczynamy od pierwszego ineksu
  *  jesli o nie bedzie numer to funkcja zwroci blad wiec nie trzeba sprawdzac przy wywolaniu
  *  8 pinow a wiec 255 mozliwosci
  */
-int konwersjaCharInt(char *bufor, byte rozmiarBufora) { // returns -1 if invalid input
+int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer) { // returns -1 if invalid input
     int32_t result = 0;
   //  int32_t tWP;
   //  int32_t number;
@@ -352,7 +362,7 @@ int konwersjaCharInt(char *bufor, byte rozmiarBufora) { // returns -1 if invalid
               break;
           }
     }
-    if (result > MAKSMALNY_MOZLIWY_NUMER_CHARAKT) {result = -1;}
+    if (result > maksNumer) {result = -1;}
     return result;
 }
 /*
