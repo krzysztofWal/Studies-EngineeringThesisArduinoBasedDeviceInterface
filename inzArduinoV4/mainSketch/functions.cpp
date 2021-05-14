@@ -146,7 +146,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         byte nr = konwersjaCharInt(bufor, i, MAKSMALNY_MOZLIWY_NUMER_CHARAKT); /* do i-tego wyrazu (bez niego), i-1 to ostatni wyraz  zapełniony w tablicy polecenie*/
         
         if (nr > 0) {
-            ustawChar(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
+            ustawCharakt(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
         } else {
             sSendLn("Nieprawidlowa komenda");
         }
@@ -315,8 +315,11 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
 
 Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu, byte nowyStan) {
     for (size_t i = 0; i < iloscPinow; i++) {
-        if (nrPinu == (pinyLasera + i)->rzeczywistyNrPinu) {
-            digitalWrite(nrPinu, nowyStan);
+      /* 
+       *  wprowadzona zmiana nrPinu -> rzeczywistyNrPinu, bardzo możliwe, że to w związku z niezmienieniem wczesniejszym (za to zmienieniem wyzej)
+       */
+        if (rzeczywistyNrPinu == (pinyLasera + i)->rzeczywistyNrPinu) {
+            digitalWrite(rzeczywistyNrPinu, nowyStan);
             return (pinyLasera + i);
         }
     }
@@ -373,9 +376,9 @@ void ustawCharakt(int number, Pin pinyCharakterystyk[], byte iloscPinowCharakt, 
     for (uint8_t i = 0; i < iloscPinowCharakt; i++)
         if ((int)(number & (1u << i))) {
         /* na wyjsciu 1 */
-            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i]->rzeczywistyNrPinu, HIGH), HIGH);
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i].rzeczywistyNrPinu, HIGH), HIGH);
         } else {
-            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i]->rzeczywistyNrPinu, LOW), LOW);
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinowLasera, pinyCharakterystyk[i].rzeczywistyNrPinu, LOW), LOW);
         }
 }
 

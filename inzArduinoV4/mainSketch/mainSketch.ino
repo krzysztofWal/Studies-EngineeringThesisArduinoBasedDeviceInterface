@@ -58,7 +58,7 @@ void setup()
         {STATE_SEL_5_PIN,  25,PIN_CYFROWY, 0, "State select: 5", OUTPUT},
         {STATE_SEL_6_PIN,  26, PIN_CYFROWY,0, "State select: 6", OUTPUT},
         {STATE_SEL_7_PIN,  27,PIN_CYFROWY, 0, "State select: 7", OUTPUT},
-    }
+    };
     
 
     Pin laserReady = { LASER_READY_PIN, 15, PIN_CYFROWY, 0, "Laser ready [when HIGH]", INPUT };
@@ -285,7 +285,7 @@ void setup()
 
             sSendLn();
 
-            obsluzKomende(pinyLasera, ILOSC_PINOW, bufor, mcp);
+            obsluzKomende(pinyLasera, ILOSC_PINOW, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, bufor, mcp);
 
             buforPelny = 0;
 
