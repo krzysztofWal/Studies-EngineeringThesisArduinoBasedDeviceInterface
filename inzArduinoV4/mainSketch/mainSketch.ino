@@ -1,6 +1,16 @@
 
 #include "functions.h"
 
+/*
+Notatki - ledy błędów oraz laser ready są odświeżane za każdą iteracją pętli
+emition gate oraz laser disable są aktualizowane przy zmianie (wewnątrz funkcji obsluzKomende())
+
+funkcje wyświetlające: (troszkę tu bałagam)
+wszystkie piny: osobna funkcja (wywolanie w obsluzKomende()), 
+pojedynczy pin: w funkcji (obsluzKomende()), wywoluje funkcje wystwietlOpisPinu();
+
+*/
+
 /*zmienne globalne wykorzystywnae przez przerwania*/
 volatile byte przerwaniePrzycisk = 0;
 volatile byte stanPrzycisku = 0;
@@ -104,6 +114,21 @@ void setup()
     
     };
 
+    /* piny - ustawienie input/output i ustawienie startowych wartości
+    wyjść sterujących na stan niski, just to be on the safe side, same przy resecie powinny wrócić do domyślnej wartości
+    */
+
+    for (size_t i = 0; i < ILOSC_PINOW; i++) {
+        if (pinyLasera[i].rodzajPinu == PIN_CYFROWY) {
+            pinMode(pinyLasera[i].rzeczywistyNrPinu, pinyLasera[i].inOut);
+        }
+        /*ustaw wszystkie wyjscia na 0
+        just to be on the safe side, same przy resecie powinny wrócić do domyślnej wartości*/
+        if (pinyLasera[i].inOut == OUTPUT) {
+            digitalWrite(pinyLasera[i].rzeczywistyNrPinu, LOW);
+        }
+    }
+
     /*obsługa wyświetlacza*/
     extern uint8_t TinyFont[];
     extern uint8_t MediumNumbers[];
@@ -122,25 +147,10 @@ void setup()
     /*pierwsze siedem LEDow odpowiada kolejnym pinom w tablicy pinyBledow*/
     byte ledNrPin[ILOSC_LEDOW] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_READY_PIN, LED_LASER_DISABLE_PIN,  LED_LAS_EMIT_GATE_ENABLE_PIN };
 	
-
 	/* ======= ustawianie typów pinów (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
 	
 	/* rozpoczęcie komunikacji szeregowej */
 	Serial.begin(9600);
-	
-    /* piny - ustawienie input/output i ustawienie startowych wartości
-    wyjść sterujących na stan niski,
-    diod informujących o stanach wejść na stan odpowiadający stanom odczytanym z wejść
-    */
-    for (size_t i = 0; i < ILOSC_PINOW; i++) {
-        if (pinyLasera[i].rodzajPinu == PIN_CYFROWY) {
-            pinMode(pinyLasera[i].rzeczywistyNrPinu, pinyLasera[i].inOut);
-        }
-        /*ustaw wszystkie wyjscia na 0*/
-        if (pinyLasera[i].inOut == OUTPUT) {
-            digitalWrite(pinyLasera[i].rzeczywistyNrPinu, LOW);
-        }
-    }
 
 	/* piny ekspandera (LEDy)*/
     for (size_t i = 0; i < ILOSC_LEDOW; i++) {

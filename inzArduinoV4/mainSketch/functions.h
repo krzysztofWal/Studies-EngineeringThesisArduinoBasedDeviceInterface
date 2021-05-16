@@ -239,7 +239,7 @@ Fukcja zwraca
 Używane funkcje:
 	-
 */
-int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer);
+int8_t konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer);
 
 /*void ustawCharakt()
 Opis: Ustawia stany pinow zawartych w tablicy pinyCharakterystyk przekazywanej do funkcji jako wskaźnik, rowniez aktualizując ich stany w tablicy pinyLaser[],

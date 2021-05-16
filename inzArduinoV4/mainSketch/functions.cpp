@@ -1,5 +1,14 @@
 #include "functions.h"
 
+/*
+ * TO-DO:
+ * wyswietlacz
+ * dodać możliwość wpisania zera przy instukcji waveformowej - dun, trzeba sprawdzić
+ * wyświetlanie na termicie
+ * (?) zerowanie global enable i emition gate przy laser disable - dun
+ * 
+ */
+
 /* ==== poczatkowe ustawienia peryferiow ==== */
 void przyciskTimerUstawienie() {
     TCCR1A = 0; // timer 1 control register A - wyzerowanie , Arduino podobno lubi ustawiać
@@ -31,12 +40,10 @@ void wyswietl(byte trybWyswietlacza, LCD5110& wyswietlacz, uint8_t *font) {
     case 0:
         wyswietlacz.print("POW-AMP MONIT", CENTER, 0);
         wyswietlacz.print("PRE-AMP MONIT", CENTER, 25);
-        
         break;
     case 1:
         wyswietlacz.print("POW-AMP S. P.", CENTER, 0);
         wyswietlacz.print("PRE-AMP C. P.", CENTER, 25);
-
         break;
     case 2:
         wyswietlacz.print("B-TEMP MONIT", CENTER, 0);
@@ -127,8 +134,12 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
             }
         }
         if (temp == 0) {
-           aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
-           mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LAS_DISABLE_PIN, HIGH), HIGH);
+            mcp.digitalWrite(LED_LASER_DISABLE_PIN, HIGH);
+            // zmien stan emmition gate i global enable pin na niski (razem z dioda infomujaca o stanie emition gate)
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LASER_EMITION_GATE_PIN, LOW), LOW);
+            mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, LOW);
+            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, GLOBAL_ENABLE_PIN, LOW), LOW);
         }
 	
 	/*
@@ -140,12 +151,12 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
 
         /*
          * funkcja konwersja sprawdza, czy wielkosc jest w odpowiednim zakresie,
-		 * zwraca -1 jesli nie jest w odpowiednim zakresie lub nie jest 
+		 * zwraca -1 jesli nie jest w odpowiednim zakresie lub nie jest liczbą
          */
 
-        byte nr = konwersjaCharInt(bufor, i, MAKSMALNY_MOZLIWY_NUMER_CHARAKT); /* do i-tego wyrazu (bez niego), i-1 to ostatni wyraz  zapełniony w tablicy polecenie*/
-        
-        if (nr > 0) {
+        int8_t nr = konwersjaCharInt(bufor, i, MAKSMALNY_MOZLIWY_NUMER_CHARAKT); /* do i-tego wyrazu (bez niego), i-1 to ostatni wyraz  zapełniony w tablicy polecenie*/
+        //sSendLn(nr);
+        if (nr >= 0) {
             ustawCharakt(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
         } else {
             sSendLn("Nieprawidlowa komenda");
@@ -160,16 +171,23 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
                 /* zmien stan pinu cyfrowego */
                 aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
     
-                /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable */
+                /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable 
+                jesli laser disable pinjest wlaczany to wylacz global enable i emittion gate*/
    
                 if (sprawdzonePolecenie.nrPinu == LASER_EMITION_GATE_PIN) {
                     mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, sprawdzonePolecenie.nowyStan);
-                  
                 }
                 else if (sprawdzonePolecenie.nrPinu == LAS_DISABLE_PIN) {
                     mcp.digitalWrite(LED_LASER_DISABLE_PIN, sprawdzonePolecenie.nowyStan);
+                        if (sprawdzonePolecenie.nowyStan == HIGH) {
+                            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, LASER_EMITION_GATE_PIN, LOW), LOW);
+                            mcp.digitalWrite(LED_LAS_EMIT_GATE_ENABLE_PIN, LOW);
+                            aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, GLOBAL_ENABLE_PIN, LOW), LOW);
+                        }
                 }
-    
+
+            
+
             }
             else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
                 sSendLine;
@@ -200,7 +218,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         }
         else {
             /* Wpisana komenda jest nieprawidlowa */
-            sSendLn("Nieprawidlowa komenda");
+            sSendLn("Nieprawidłowa komenda");
         }
     }
 }
@@ -348,10 +366,10 @@ byte zwrocNumerWyboru(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPin
  *  zwraca -1 jesli niechciane wejscie
  *  przekazujemy b + jakis numer czyli numer zaczynamy od pierwszego ineksu
  *  jesli o nie bedzie numer to funkcja zwroci blad wiec nie trzeba sprawdzac przy wywolaniu
- *  8 pinow a wiec 255 mozliwosci
+ *  
  */
-int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer) { // returns -1 if invalid input
-    int32_t result = 0;
+int8_t konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer) { // returns -1 if invalid input
+    int8_t result = 0;
   //  int32_t tWP;
   //  int32_t number;
   // theoretically od tylu bylo by ciut wydajniej bo bez tego odejmowania za kazdym razem ale to tam szczegoly
@@ -365,7 +383,11 @@ int konwersjaCharInt(char *bufor, byte rozmiarBufora, byte maksNumer) { // retur
               break;
           }
     }
+//    sSend("konwersjaCharInt: ");
+//    sSendLn(result);
     if (result > maksNumer) {result = -1;}
+//    sSend("konwersjaCharInt: ");
+//    sSendLn(result);
     return result;
 }
 /*
