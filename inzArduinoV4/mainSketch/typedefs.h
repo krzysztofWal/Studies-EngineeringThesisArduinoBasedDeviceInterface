@@ -9,6 +9,11 @@
 	#include "WProgram.h"
 #endif
 
+#define TERMITE 
+
+// V_IN 4.94
+// V_MAX 4.80
+
 
 /*obsluga przycisku*/
 #define WARTOSC_WCZYTYWANA 0
@@ -38,7 +43,7 @@
 #define LED_LASER_DISABLE_PIN 15//PB7 LED 10
 
 /*wyswietlacz*/
-#define WYBOR_ZRODLA_NAPIECIA_PIN 59
+#define WYBOR_ZRODLA_NAPIECIA_PIN A3
 #define PRZYCISK_PIN 53
 #define PRZYCISK_PORT PINB
 #define PRZYCISK_REJ_POZYCJA PB0
@@ -64,29 +69,30 @@
 #define LAS_DISABLE_PIN 18
 #define MODE_SELECT_BIT 19
 
-#define STATE_SEL_0_PIN 30
-#define STATE_SEL_1_PIN 28
+#define STATE_SEL_0_PIN 22
+#define STATE_SEL_1_PIN 24
 #define STATE_SEL_2_PIN 26
-#define STATE_SEL_3_PIN 24
-#define STATE_SEL_4_PIN 22
-#define STATE_SEL_5_PIN 27
+#define STATE_SEL_3_PIN 28
+#define STATE_SEL_4_PIN 30
+#define STATE_SEL_5_PIN 23
 #define STATE_SEL_6_PIN 25
-#define STATE_SEL_7_PIN 23
+#define STATE_SEL_7_PIN 27
 
 /*piny monitorujace*/
-#define BASE_PLATE_TEMP_MON_PIN 54
-#define PRE_AMP_CUR_MON_PIN 55
-#define POW_AMP_CUR_MON_PIN 56
-#define A_S_CUR_S_P_PIN 57
-#define S_C_S_P_PIN 58
+#define BASE_PLATE_TEMP_MON_PIN A0
+#define PRE_AMP_CUR_MON_PIN A1
+#define POW_AMP_CUR_MON_PIN A2
+#define A_S_CUR_S_P_PIN A4
+#define S_C_S_P_PIN A5
  
 /*piny bledow*/
 #define POW_SUP_FAULT_PIN 62
 #define RESERVED_FAULT_PIN 63
 #define BEAM_COLL_FAULT_PIN 64
 #define POW_AMP_CUR_FAULT_PIN 65
-#define PRE_AMP_CUR_FAULT_PIN 66
-#define BASE_PLATE_TEMP_FAULT_PIN 67
+#define PRE_AMP_CUR_FAULT_PIN 67
+#define BASE_PLATE_TEMP_FAULT_PIN 66
+/* zmiana celowa PRE_AMP i BASE_PLATE z powodu przylutowania odwrotnego*/
 #define SEED_LAS_TEMP_FAULT_PIN 68
 
 #define ILOSC_PINOW 26
@@ -120,7 +126,7 @@ patrz: funkcja obslugaLedowBledow()*/
 #define sSendLine Serial.println("====================================")
 
 typedef struct {
-    byte rzeczywistyNrPinu; //fizyczny nr pinu Atmegi2560
+    byte rzeczywistyNrPinu; //nr pinu Atmegi2560
     byte numerWyboru; //nr widoczny przez użytkownika, piny 'posegregowane' są kategoriami
     byte rodzajPinu; // ANALOG/DIGITAL
     byte stanPinu; //używany przy pinach cyfrowych - HIGH/LOW

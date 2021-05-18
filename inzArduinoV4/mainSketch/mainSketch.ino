@@ -5,9 +5,8 @@
 Notatki - ledy błędów oraz laser ready są odświeżane za każdą iteracją pętli
 emition gate oraz laser disable są aktualizowane przy zmianie (wewnątrz funkcji obsluzKomende())
 
-funkcje wyświetlające: (troszkę tu bałagam)
-wszystkie piny: osobna funkcja (wywolanie w obsluzKomende()), 
-pojedynczy pin: w funkcji (obsluzKomende()), wywoluje funkcje wystwietlOpisPinu();
+funkcje wyświetlające: 
+wszystkie wywoływane z obsluzKomende();
 
 */
 
@@ -134,7 +133,7 @@ void setup()
     extern uint8_t MediumNumbers[];
     LCD5110 wyswietlacz(SCK_PIN, MOSI_PIN, DC_PIN, RST_PIN, CS_PIN);
     /* tryb 0 - monitorowane prady, tryb 1 - temperatura podstawy, tryb 2 - ustawiane potencjometrami wartosci*/
-    byte trybWyswietlacza = 0;
+    byte trybWyswietlacza = 1;
     byte zmienionyEkranWyswietlacza = 0;
     byte pierwszeWykrycieNacisnieciaPrzycisku = 1;
     byte odczytaneWartosci[ILOSC_CYFR_ADC] = {0, 0 ,0, 0, 0, 0 };
@@ -190,7 +189,8 @@ void setup()
     stan niski - dwa, bezpośrednio z dwóch źródeł zewnętrznych
     */
     pinMode(WYBOR_ZRODLA_NAPIECIA_PIN, INPUT);
-
+    sSendLn(digitalRead(WYBOR_ZRODLA_NAPIECIA_PIN));
+    
     /*przerwanie od przycisku - Pin Change Interrupt*/
     przerwaniePrzyciskUstawienie();
 
@@ -207,7 +207,7 @@ void setup()
     sSendLn("Status poczatkowy:");
     wyswietlStanyWszystkichPinow(pinyLasera, ILOSC_PINOW);
     
-    wyswietlacz.InitLCD(60);
+    wyswietlacz.InitLCD(75);
     wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
 
 
@@ -245,7 +245,9 @@ void setup()
                 stanPrzycisku = NIE_SPRAWDZAJ_STANU_PRZYCISKU;
                 pierwszeWykrycieNacisnieciaPrzycisku = 1;
                 PRZERWANIE_PRZYCISK_ON;
+                PRZERWANIE_TIMER2_ON;
                 przerwaniePrzycisk = 0;
+                
             }
         }
 
@@ -258,9 +260,12 @@ void setup()
 
         /* ==== obsluga odswiezania wartosci na wyswietlaczu ==== */
         if (naliczoneCykleTimerDrugi > 19) {
+            PRZERWANIE_TIMER2_OFF;
+           // sSendLn("Dziala");
             odczytajWartosciMonitorow(trybWyswietlacza, odczytaneWartosci);
             aktualizujWyswietlaneWartosci(odczytaneWartosci, wyswietlacz, trybWyswietlacza, MediumNumbers);
             naliczoneCykleTimerDrugi = 0;
+            PRZERWANIE_TIMER2_ON;
         }
 
         /* ==== odbieranie komend od uzytkownika ==== */
@@ -275,16 +280,17 @@ void setup()
             bufor[index] = Serial.read();
             sSend(bufor[index]);
             index++;
+            
             if (index == WIELKOSC_BUFORA_SERIAL || bufor[index - 1] == 13 || bufor[index - 1] == 10) {
                 index = 0;
                 buforPelny = 1;
             }
+
         }
         
         /* ==== obsluga wpisanej komendy ==== */
 
         /*
-         * 
          *    Jesli bufor jest pelny to obsluz komende wpisana w buforze
          *    Wyzeruj flagę bufor pelny
          */
@@ -293,8 +299,10 @@ void setup()
             PRZERWANIE_TIMER1_OFF;
             PRZERWANIE_TIMER2_OFF;
 
+            #ifndef TERMITE
             sSendLn();
-
+            #endif
+            
             obsluzKomende(pinyLasera, ILOSC_PINOW, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, bufor, mcp);
 
             buforPelny = 0;

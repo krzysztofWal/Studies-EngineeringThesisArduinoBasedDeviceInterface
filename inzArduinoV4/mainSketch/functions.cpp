@@ -76,6 +76,7 @@ void przelaczTrybWyswietlacza(byte& trybWyswietlacza, byte wyborZrodlaZasilania)
 void aktualizujWyswietlaneWartosci(byte* odczytaneWartosci, LCD5110& wyswietlacz, byte trybWyswietlacza, uint8_t* font) {
     // wyswietl(trybWyswietlacza, wyswietlacz, fontNapisy);
     wyswietlacz.setFont(font);
+   // sSendLn("Aktualizuj");
     switch (trybWyswietlacza) {
     case 0:
     case 1:
@@ -111,8 +112,11 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         polecenie[i] = 0;
     }
 
+    /*
+     * przepisanie bez znakow 'konczacych'
+     */
     while (i < WIELKOSC_BUFORA_SERIAL) {
-        if (bufor[i] != 13) {
+        if (bufor[i] != 13 && bufor[i] != 10) {
             polecenie[i] = bufor[i];
             i++;
         }
@@ -159,7 +163,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         if (nr >= 0) {
             ustawCharakt(nr, pinyCharakterystyk, ILOSC_PINOW_CHARAKT, pinyLasera, ILOSC_PINOW);
         } else {
-            sSendLn("Nieprawidlowa komenda");
+            sSendLn("Wrong command");
         }
         
     } else {
@@ -169,6 +173,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
     
             if (sprawdzonePolecenie.rodzajPolecenia == ZMIEN_STAN_CYFROWEG0) {
                 /* zmien stan pinu cyfrowego */
+                
                 aktualizujStanPinu(zmienStanPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu, sprawdzonePolecenie.nowyStan), sprawdzonePolecenie.nowyStan);
     
                 /* zasygnalizuj zmiane pinow laser disable i laser emittion gate enable 
@@ -186,11 +191,9 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
                         }
                 }
 
-            
-
             }
             else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
-                sSendLine;
+               /* sSendLine;
                 sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
                 wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
                 sSend(" ");sSend(" Stan: ");
@@ -200,16 +203,18 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
                 else {
                     sSendLn("LOW");
                 };
-                sSendLine;
+                sSendLine;*/
+                wyswietlOpisCyfrowego(pinyLasera, iloscPinow, sprawdzonePolecenie);
             }
             else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY) {
-                sSendLine;
+                /*sSendLine;
                 sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
                 wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
                 sSend(" "); sSend(" Wartosc: ");
                 sSend(zwrocWartPinuAnalogowego(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));
                 sSendLn("%");
-                sSendLine;
+                sSendLine;*/
+                wyswietlOpisAnalogowego(pinyLasera, iloscPinow, sprawdzonePolecenie);
             }
             else {
                 wyswietlStanyWszystkichPinow(pinyLasera, iloscPinow);
@@ -218,7 +223,7 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
         }
         else {
             /* Wpisana komenda jest nieprawidlowa */
-            sSendLn("Nieprawidłowa komenda");
+            sSendLn("Wrong command");
         }
     }
 }
@@ -442,27 +447,59 @@ byte zwrocWartPinuAnalogowego(Pin pinyLasera[], size_t iloscPinow, byte nrPinu) 
 }
 
 void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci) {
+    //sSendLn("Odczytaj");
     uint16_t pierwszaWartosc;
     uint16_t drugaWartosc;
+    float tempWar1;
+    float tempWar2;
     switch (trybWyswietlacza) {
     case 0:
         pierwszaWartosc = map(analogRead(POW_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
         drugaWartosc = map(analogRead(PRE_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
         break;
     case 1:
-        pierwszaWartosc = map(analogRead(A_S_CUR_S_P_PIN), 0, 1023, 0, 100);
-        drugaWartosc = map(analogRead(S_C_S_P_PIN), 0, 1023, 0, 100);
+        
+        pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
+        pierwszaWartosc = pierwszaWartosc / 1023 * 4.94f;
+
+        //pierwszaWartosc = pierwszaWartosc * 4.94 / 4.80f;
+      //  sSendLn(pierwszaWartosc);
+       // pierwszaWartosc = map(pierwszaWartosc, 0, 97, 0, 100);
+       drugaWartosc = analogRead(S_C_S_P_PIN);
+          sSend(drugaWartosc);
+        sSend(" ");
+        drugaWartosc =round(drugaWartosc / 1023.0f * 495);
+         sSend(drugaWartosc);
+        sSend(" ");
+        drugaWartosc = (int)(round(drugaWartosc *2.083));
+        sSend(drugaWartosc);
+        sSend(" ");
+        drugaWartosc = (int)(round(drugaWartosc/10.0f));
+    sSendLn(drugaWartosc);
+        
+        //sSend(" ");
+          //drugaWartosc = drugaWartosc * 4.94 / 4.80f * 100;
+        
+      //  sSendLn(drugaWartosc);
+     //   drugaWartosc = map(analogRead(S_C_S_P_PIN), 0, 1023, 0, 100);
+      //  drugaWartosc = map(drugaWartosc, 0, 97, 0, 100);
         break;
     case 2:
         pierwszaWartosc = map(analogRead(BASE_PLATE_TEMP_MON_PIN), 0, 1023, 0, 100);
         break;
     }
-    odczytaneWartosci[0] = pierwszaWartosc / 100;
-    odczytaneWartosci[1] = pierwszaWartosc / 10 - odczytaneWartosci[0] * 10;
-    odczytaneWartosci[2] = pierwszaWartosc % 10;
-    odczytaneWartosci[3] = drugaWartosc / 100;
-    odczytaneWartosci[4] = drugaWartosc / 10 - odczytaneWartosci[3] * 10;
-    odczytaneWartosci[5] = drugaWartosc % 10;
+    odczytaneWartosci[0] = (int)pierwszaWartosc / 100;
+    odczytaneWartosci[1] = (int)pierwszaWartosc / 10 - (int)odczytaneWartosci[0] * 10;
+    odczytaneWartosci[2] = (int)pierwszaWartosc % 10;
+    odczytaneWartosci[3] = (int)drugaWartosc / 100;
+    odczytaneWartosci[4] = (int)drugaWartosc / 10 - (int)odczytaneWartosci[3] * 10;
+    odczytaneWartosci[5] = (int)drugaWartosc % 10;
+   // sSend(odczytaneWartosci[0]);
+  //  sSend(odczytaneWartosci[1]);
+  //  sSendLn(odczytaneWartosci[2]);
+  //  sSend(odczytaneWartosci[3]);
+  //  sSend(odczytaneWartosci[4]);
+  //  sSendLn(odczytaneWartosci[5]);
 }
 
 /* ==== wyswietlanie tekstowe ==== */
@@ -475,8 +512,35 @@ void wyswietlOpisPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu) {
     }
 }
 
-void wyswietlStanyWszystkichPinow(Pin pinyLasera[], size_t iloscPinow) {
+void wyswietlOpisAnalogowego(Pin pinyLasera[], size_t iloscPinow, const PolecenieInfo &sprawdzonePolecenie) {
     sSendLine;
+    sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
+    wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
+    sSend(" "); sSend(" Wartosc: ");
+    sSend(zwrocWartPinuAnalogowego(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));
+    sSendLn("%");
+    sSendLine;
+}
+
+void wyswietlOpisCyfrowego(Pin pinyLasera[], size_t iloscPinow, const PolecenieInfo &sprawdzonePolecenie) {
+    sSendLine;
+    sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
+    wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
+    sSend(" ");sSend(" Stan: ");
+    if (zwrocStanPinuCyfrowego(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu)) {
+        sSendLn("HIGH");
+    }
+    else {
+        sSendLn("LOW");
+    };
+    sSendLine;
+}
+
+
+void wyswietlStanyWszystkichPinow(Pin pinyLasera[], size_t iloscPinow) {
+    #ifndef TERMITE
+    sSendLine;
+    #endif
     for (size_t i = 0; i < iloscPinow; i++) {
         sSend((pinyLasera + i)->numerWyboru);
         sSend(" | ");
@@ -505,6 +569,7 @@ void wyswietlStanyWszystkichPinow(Pin pinyLasera[], size_t iloscPinow) {
         }
         
     }
+    
     sSendLine;
 }
 

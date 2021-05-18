@@ -328,6 +328,53 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci);
 
 /* ==== wyswietlanie tekstowe ==== */
 
+/* void wyswietlOpisPinu() 
+Opis:
+    Wysyła połączeniem szeregowym opis wybranego pinu zawarty w tablicy wszytkiePiny. Zakłada, że komunnikacja szeregowa została zainicjowana oraz, że pin znajduje się w tej tablicy
+Argumenty:
+    Pin pinyLasera[] - wska�nik na pierwszy element tablicy z zawartym opisem pinu
+    size_t iloscPinow - ilość elementów w tablicy
+    byte nrPinu - "rzeczywsuty" numer pinu, którego opis ma być przes�any
+Funkcja zwraca:
+    -
+Używane funkcje:
+    print() - metoda klasy Serial (Arduino)
+*/
+void wyswietlOpisPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
+
+
+/*  void wyswietlOpisAnalogowego()
+ Opis:
+    Wysyła połączeniem szeregowym sformatowany prompt o wartosci odczytanej na pinie analogowym
+    Pin pinyLasera[] - wskaźnik na pierwszy element tablicy z zawaratymi informacjami o pinach
+    size_t iloscPinow - rozmiar tej tablicy
+    const PolecenieInfo &sprawdzonePolecenie - referencja do struktury zawierającej informacje o pinie do wyświetlenia
+Funkcja zwraca:
+    -
+Używane funkcje:
+    zwrocWartPinuAnalogowego(),
+    zwrocNumerWyboru(),
+    wyswietlOpisPinu(),
+    print(), println() - metody obiektu Serial (Arduino)
+*/
+void wyswietlOpisAnalogowego(Pin pinyLasera[], size_t iloscPinow, const PolecenieInfo &sprawdzonePolecenie);
+
+/*  void wyswietlOpisCyfrowego()
+ Opis:
+    Wysyła połączeniem szeregowym sformatowany prompt o stanie pinu cyfrowego
+    Pin pinyLasera[] - wskaźnik na pierwszy element tablicy z zawaratymi informacjami o pinach
+    size_t iloscPinow - rozmiar tej tablicy
+    const PolecenieInfo &sprawdzonePolecenie - referencja do struktury zawierającej informacje o pinie do wyświetlenia
+Funkcja zwraca:
+    -
+Używane funkcje:
+    byte zwrocStanPinuCyfrowego(),
+    zwrocNumerWyboru(),
+    wyswietlOpisPinu();
+    print(), println() - metody obiektu Serial (Arduino)
+*/
+void wyswietlOpisCyfrowego(Pin pinyLasera[], size_t iloscPinow, const PolecenieInfo &sprawdzonePolecenie);
+
 /*  void wyswietlStanyPinow()
  Opis:
     Wysyła połączeniem szeregowym stany wszystkich pinów zawartych w tablicy wszytkiePiny. Do odczytania tych stanów używa funkcji zwrocWartoscPinuAnalogowego() oraz zwrocWartoscPinuCyfrowego(). Zakłada, że komunikacja szeregowa została zainicjowana
@@ -342,20 +389,6 @@ Używane funkcje:
     print(), println() - metody obiektu Serial (Arduino)
 */
 void wyswietlStanyWszystkichPinow(Pin pinyLasera[], size_t iloscPinow);
-
-/* void wyswietlOpisPinu() 
-Opis:
-    Wysyła połączeniem szeregowym opis wybranego pinu zawarty w tablicy wszytkiePiny. Zakłada, że komunnikacja szeregowa została zainicjowana oraz, że pin znajduje się w tej tablicy
-Argumenty:
-    Pin pinyLasera[] - wska�nik na pierwszy element tablicy z zawartym opisem pinu
-    size_t iloscPinow - ilość elementów w tablicy
-    byte nrPinu - "rzeczywsuty" numer pinu, którego opis ma być przes�any
-Funkcja zwraca:
-    -
-Używane funkcje:
-    print() - metoda klasy Serial (Arduino)
-*/
-void wyswietlOpisPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
 
 /* ==== ledy bledow ==== */
 /*void obslugaLedowBledow()
