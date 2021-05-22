@@ -68,7 +68,6 @@ void setup()
         {STATE_SEL_7_PIN,  27,PIN_CYFROWY, 0, "State select: 7", OUTPUT},
     };
     
-
     Pin laserReady = { LASER_READY_PIN, 15, PIN_CYFROWY, 0, "Laser ready [when HIGH]", INPUT };
 
     byte poprzedniStanLaserReady;
@@ -112,9 +111,11 @@ void setup()
     
     };
 
+    /* ======= ustawianie typów pinów (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
+
     /* piny - ustawienie input/output i ustawienie startowych wartości
-    wyjść sterujących na stan niski, just to be on the safe side, same przy resecie powinny wrócić do domyślnej wartości
-    */
+    wyjść sterujących na stan niski, just to be on the safe side, same przy resecie powinny wrócić do domyślnej wartości */
+
 
     for (size_t i = 0; i < ILOSC_PINOW; i++) {
         if (pinyLasera[i].rodzajPinu == PIN_CYFROWY) {
@@ -127,11 +128,11 @@ void setup()
         }
     }
 
-    /*obsługa wyświetlacza*/
+    /* === obsługa wyświetlacza === */
     extern uint8_t TinyFont[];
     extern uint8_t MediumNumbers[];
     LCD5110 wyswietlacz(SCK_PIN, MOSI_PIN, DC_PIN, RST_PIN, CS_PIN);
-    /* tryb 0 - monitorowane prady, tryb 1 - temperatura podstawy, tryb 2 - ustawiane potencjometrami wartosci*/
+    /* tryb 0 - monitorowane prady, tryb 1 - ustawiane potencjometrami wartosci, tryb 2 - temperatura podstawy */
     byte trybWyswietlacza = 1;
     byte zmienionyEkranWyswietlacza = 0;
     byte pierwszeWykrycieNacisnieciaPrzycisku = 1;
@@ -145,7 +146,6 @@ void setup()
     /*pierwsze siedem LEDow odpowiada kolejnym pinom w tablicy pinyBledow*/
     byte ledNrPin[ILOSC_LEDOW] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN, LED5_PIN, LED6_PIN, LED7_PIN, LED_LASER_READY_PIN, LED_LASER_DISABLE_PIN,  LED_LAS_EMIT_GATE_ENABLE_PIN };
 	
-	/* ======= ustawianie typów pinów (cyfrowy/analogowy; wejcie/ wyjscie) i poczatkowych stanow ========*/
 	
 	/* rozpoczęcie komunikacji szeregowej */
 	Serial.begin(9600);
@@ -158,7 +158,6 @@ void setup()
         if (ledNrPin[i] == LED_LASER_DISABLE_PIN || ledNrPin[i] == LED_LAS_EMIT_GATE_ENABLE_PIN) {
             mcp.digitalWrite(ledNrPin[i], LOW);
         }
-      
     }
 
    /* sprawdzenie diód */
