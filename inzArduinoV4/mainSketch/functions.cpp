@@ -454,28 +454,45 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci) {
     float tempWar2;
     switch (trybWyswietlacza) {
     case 0:
+    
+     //   pierwszaWartosc = analogRead(POW_AMP_CUR_MON_PIN);
         pierwszaWartosc = map(analogRead(POW_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
+        //pierwszaWartosc = round(pierwszaWartosc / 1023.0f * V_IN * 1000);
+    //    sSendLn(pierwszaWartosc);
+        
         drugaWartosc = map(analogRead(PRE_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
         break;
     case 1:
         
-        pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
-        pierwszaWartosc = pierwszaWartosc / 1023 * 4.94f;
+   //     pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
+    //    pierwszaWartosc = pierwszaWartosc / 1023 * 4.94f;
 
+     pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
+      //    sSend(pierwszaWartosc);
+     //   sSend(" ");
+        pierwszaWartosc =round(pierwszaWartosc / 1023.0f * V_IN * 100);
+     //    sSend(pierwszaWartosc);
+      //  sSend(" ");
+        pierwszaWartosc = (int)(round(pierwszaWartosc *2.083));
+      //  sSend(pierwszaWartosc);
+      //  sSend(" ");
+        pierwszaWartosc = (int)(round(pierwszaWartosc/10.0f));
+//sSend(pierwszaWartosc);
+      //  sSendLn(" ");
         //pierwszaWartosc = pierwszaWartosc * 4.94 / 4.80f;
       //  sSendLn(pierwszaWartosc);
        // pierwszaWartosc = map(pierwszaWartosc, 0, 97, 0, 100);
        drugaWartosc = analogRead(S_C_S_P_PIN);
-          sSend(drugaWartosc);
-        sSend(" ");
-        drugaWartosc =round(drugaWartosc / 1023.0f * 495);
-         sSend(drugaWartosc);
-        sSend(" ");
+     //     sSend(drugaWartosc);
+      //  sSend(" ");
+        drugaWartosc =round(drugaWartosc / 1023.0f * V_IN * 100);
+    //     sSend(drugaWartosc);
+    //    sSend(" ");
         drugaWartosc = (int)(round(drugaWartosc *2.083));
-        sSend(drugaWartosc);
-        sSend(" ");
+     //   sSend(drugaWartosc);
+     //   sSend(" ");
         drugaWartosc = (int)(round(drugaWartosc/10.0f));
-    sSendLn(drugaWartosc);
+   // sSendLn(drugaWartosc);
         
         //sSend(" ");
           //drugaWartosc = drugaWartosc * 4.94 / 4.80f * 100;
@@ -589,3 +606,21 @@ void obslugaLedowBledow(Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte il
         }
     }
 }
+
+/* led init */
+void sprawdzLedy(byte *const ledNrPin, byte iloscLedow, Adafruit_MCP23017& mcp) {
+  for (byte i = 0; i < iloscLedow; i++) {
+    if (i == 8) {
+       mcp.digitalWrite(ledNrPin[i+1], HIGH);
+    } else if (i == 9 ) {
+       mcp.digitalWrite(ledNrPin[i-1], HIGH);
+    } else {
+       mcp.digitalWrite(ledNrPin[i], HIGH);
+    }
+    
+    _delay_ms(100);
+    mcp.digitalWrite(ledNrPin[i], LOW);
+  }
+  _delay_ms(100);
+  mcp.digitalWrite(ledNrPin[8], LOW);
+ }

@@ -11,9 +11,8 @@
 
 #define TERMITE 
 
-// V_IN 4.94
-// V_MAX 4.80
-
+/* odczytywanie ustawionych potencjometrami poziomow napiec - referencja */
+#define V_IN 4.94
 
 /*obsluga przycisku*/
 #define WARTOSC_WCZYTYWANA 0

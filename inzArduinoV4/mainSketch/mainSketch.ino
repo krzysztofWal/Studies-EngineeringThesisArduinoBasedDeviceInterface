@@ -1,4 +1,3 @@
-
 #include "functions.h"
 
 /*
@@ -151,6 +150,7 @@ void setup()
 	/* rozpoczęcie komunikacji szeregowej */
 	Serial.begin(9600);
 
+
 	/* piny ekspandera (LEDy)*/
     for (size_t i = 0; i < ILOSC_LEDOW; i++) {
         mcp.pinMode(ledNrPin[i], OUTPUT);
@@ -158,7 +158,12 @@ void setup()
         if (ledNrPin[i] == LED_LASER_DISABLE_PIN || ledNrPin[i] == LED_LAS_EMIT_GATE_ENABLE_PIN) {
             mcp.digitalWrite(ledNrPin[i], LOW);
         }
+      
     }
+
+   /* sprawdzenie diód */
+    sprawdzLedy(ledNrPin, ILOSC_LEDOW, mcp);
+    
 
     /* pin laser ready i LED sygnalizujący*/ 
     poprzedniStanLaserReady = zwrocStanPinuCyfrowego(&laserReady, 1, laserReady.rzeczywistyNrPinu);
@@ -189,7 +194,7 @@ void setup()
     stan niski - dwa, bezpośrednio z dwóch źródeł zewnętrznych
     */
     pinMode(WYBOR_ZRODLA_NAPIECIA_PIN, INPUT);
-    sSendLn(digitalRead(WYBOR_ZRODLA_NAPIECIA_PIN));
+   // sSendLn(digitalRead(WYBOR_ZRODLA_NAPIECIA_PIN));
     
     /*przerwanie od przycisku - Pin Change Interrupt*/
     przerwaniePrzyciskUstawienie();
@@ -200,13 +205,15 @@ void setup()
     /* timer - odświeżanie ekranu*/
     czestOdswEkranuTimerUstawienie();
 
+    
     /* umożliwienie obsługi przerwań*/
     sei(); 
-  
+
+    #ifndef TERMITE
     /* wyswietl status poczatkowy */
     sSendLn("Status poczatkowy:");
     wyswietlStanyWszystkichPinow(pinyLasera, ILOSC_PINOW);
-    
+    #endif
     wyswietlacz.InitLCD(75);
     wyswietl(trybWyswietlacza, wyswietlacz, TinyFont);
 

@@ -9,14 +9,13 @@
 	#include "WProgram.h"
 #endif
 
-#include <util/delay.h>
-
 #include "typedefs.h"
 #include "LCD5110_Graph.h"
 
 #include "avr/pgmspace.h"
 //#include "libraries/Adafruit-MCP23017-Arduino-Library-master/Adafruit_MCP23017.h"
 #include "Adafruit_MCP23017.h"
+#include <util/delay.h>
 
 
 /* ==== poczatkowe ustawienia peryferiow ==== */
@@ -344,7 +343,6 @@ Używane funkcje:
 */
 void wyswietlOpisPinu(Pin pinyLasera[], size_t iloscPinow, byte nrPinu);
 
-
 /*  void wyswietlOpisAnalogowego()
  Opis:
     Wysyła połączeniem szeregowym sformatowany prompt o wartosci odczytanej na pinie analogowym
@@ -417,5 +415,6 @@ Uwagi:
 void obslugaLedowBledow(Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp);
 
 void sprawdzLedy(byte *const ledNrPin, byte iloscLedow, Adafruit_MCP23017& mcp);
+
 
 #endif
