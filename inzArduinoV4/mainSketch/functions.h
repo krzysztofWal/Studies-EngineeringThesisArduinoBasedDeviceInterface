@@ -9,6 +9,8 @@
 	#include "WProgram.h"
 #endif
 
+#include <util/delay.h>
+
 #include "typedefs.h"
 #include "LCD5110_Graph.h"
 
@@ -414,5 +416,6 @@ Uwagi:
 */
 void obslugaLedowBledow(Pin* pinyBledow, byte* poprzedniStanPinowBledow, byte iloscPinowBledow, byte* ledNrPin, Adafruit_MCP23017& mcp);
 
+void sprawdzLedy(byte *const ledNrPin, byte iloscLedow, Adafruit_MCP23017& mcp);
 
 #endif
