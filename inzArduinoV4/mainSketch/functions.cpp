@@ -1,12 +1,7 @@
 #include "functions.h"
 
 /*
- * TO-DO:
- * wyswietlacz
- * dodać możliwość wpisania zera przy instukcji waveformowej - dun, trzeba sprawdzić
- * wyświetlanie na termicie
- * (?) zerowanie global enable i emition gate przy laser disable - dun
- * 
+ * as is in the laser controller
  */
 
 /* ==== poczatkowe ustawienia peryferiow ==== */
@@ -193,27 +188,9 @@ void obsluzKomende(Pin *pinyLasera, byte iloscPinow, Pin *pinyCharakterystyk, by
 
             }
             else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_CYFROWY) {
-               /* sSendLine;
-                sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));sSend(" ");
-                wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
-                sSend(" ");sSend(" Stan: ");
-                if (zwrocStanPinuCyfrowego(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu)) {
-                    sSendLn("HIGH");
-                }
-                else {
-                    sSendLn("LOW");
-                };
-                sSendLine;*/
                 wyswietlOpisCyfrowego(pinyLasera, iloscPinow, sprawdzonePolecenie);
             }
             else if (sprawdzonePolecenie.rodzajPolecenia == ODCZYTAJ_ANALOGOWY) {
-                /*sSendLine;
-                sSend("Pin nr: ");sSend(zwrocNumerWyboru(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu)); sSend(" ");
-                wyswietlOpisPinu(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu);
-                sSend(" "); sSend(" Wartosc: ");
-                sSend(zwrocWartPinuAnalogowego(pinyLasera, iloscPinow, sprawdzonePolecenie.nrPinu));
-                sSendLn("%");
-                sSendLine;*/
                 wyswietlOpisAnalogowego(pinyLasera, iloscPinow, sprawdzonePolecenie);
             }
             else {
@@ -330,10 +307,7 @@ byte sprawdzKomende(PolecenieInfo* struktAdr, char polecenie[], size_t dlugosc, 
         } else {
             return 0;
         }
-
-        
     }
-
 }
 
 Pin* zmienStanPinu(Pin pinyLasera[], size_t iloscPinow, byte rzeczywistyNrPinu, byte nowyStan) {
@@ -454,52 +428,18 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci) {
     float tempWar2;
     switch (trybWyswietlacza) {
     case 0:
-    
-     //   pierwszaWartosc = analogRead(POW_AMP_CUR_MON_PIN);
         pierwszaWartosc = map(analogRead(POW_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
-        //pierwszaWartosc = round(pierwszaWartosc / 1023.0f * V_IN * 1000);
-    //    sSendLn(pierwszaWartosc);
-        
         drugaWartosc = map(analogRead(PRE_AMP_CUR_MON_PIN), 0, 1023, 0, 100);
         break;
     case 1:
-        
-   //     pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
-    //    pierwszaWartosc = pierwszaWartosc / 1023 * 4.94f;
-
-     pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
-      //    sSend(pierwszaWartosc);
-     //   sSend(" ");
+        pierwszaWartosc = analogRead(A_S_CUR_S_P_PIN);
         pierwszaWartosc =round(pierwszaWartosc / 1023.0f * V_IN * 100);
-     //    sSend(pierwszaWartosc);
-      //  sSend(" ");
         pierwszaWartosc = (int)(round(pierwszaWartosc *2.083));
-      //  sSend(pierwszaWartosc);
-      //  sSend(" ");
         pierwszaWartosc = (int)(round(pierwszaWartosc/10.0f));
-//sSend(pierwszaWartosc);
-      //  sSendLn(" ");
-        //pierwszaWartosc = pierwszaWartosc * 4.94 / 4.80f;
-      //  sSendLn(pierwszaWartosc);
-       // pierwszaWartosc = map(pierwszaWartosc, 0, 97, 0, 100);
-       drugaWartosc = analogRead(S_C_S_P_PIN);
-     //     sSend(drugaWartosc);
-      //  sSend(" ");
+        drugaWartosc = analogRead(S_C_S_P_PIN);
         drugaWartosc =round(drugaWartosc / 1023.0f * V_IN * 100);
-    //     sSend(drugaWartosc);
-    //    sSend(" ");
         drugaWartosc = (int)(round(drugaWartosc *2.083));
-     //   sSend(drugaWartosc);
-     //   sSend(" ");
         drugaWartosc = (int)(round(drugaWartosc/10.0f));
-   // sSendLn(drugaWartosc);
-        
-        //sSend(" ");
-          //drugaWartosc = drugaWartosc * 4.94 / 4.80f * 100;
-        
-      //  sSendLn(drugaWartosc);
-     //   drugaWartosc = map(analogRead(S_C_S_P_PIN), 0, 1023, 0, 100);
-      //  drugaWartosc = map(drugaWartosc, 0, 97, 0, 100);
         break;
     case 2:
         pierwszaWartosc = map(analogRead(BASE_PLATE_TEMP_MON_PIN), 0, 1023, 0, 100);
@@ -511,12 +451,7 @@ void odczytajWartosciMonitorow(byte trybWyswietlacza, byte* odczytaneWartosci) {
     odczytaneWartosci[3] = (int)drugaWartosc / 100;
     odczytaneWartosci[4] = (int)drugaWartosc / 10 - (int)odczytaneWartosci[3] * 10;
     odczytaneWartosci[5] = (int)drugaWartosc % 10;
-   // sSend(odczytaneWartosci[0]);
-  //  sSend(odczytaneWartosci[1]);
-  //  sSendLn(odczytaneWartosci[2]);
-  //  sSend(odczytaneWartosci[3]);
-  //  sSend(odczytaneWartosci[4]);
-  //  sSendLn(odczytaneWartosci[5]);
+
 }
 
 /* ==== wyswietlanie tekstowe ==== */
